@@ -19,7 +19,7 @@
  */
 
 use Illuminate\Config\FileLoader;
-use Illuminate\Database\Connection;
+use Illuminate\Database\Connection as DatabaseConnection;
 use Illuminate\Filesystem;
 
 class CompositeLoader extends FileLoader {
@@ -39,18 +39,14 @@ class CompositeLoader extends FileLoader {
 	protected $databaseTable;
 
 	/**
-	 * Create a new composite configuration loader.
+	 * Sets the database connection.
 	 *
-	 * @param  Illuminate\Filesystem  $files
-	 * @param  string  $defaultPath
 	 * @param  Illuminate\Database\Connection  $database
 	 * @return void
 	 */
-	public function __construct(Filesystem $files, $defaultPath, $database, $databaseTable)
+	public function setDatabase(DatabaseConnection $database)
 	{
-		parent::__construct($files, $defaultPath);
-		$this->database      = $database;
-		$this->databaseTable = $databaseTable;
+		$this->database = $database;
 	}
 
 	/**
@@ -64,6 +60,17 @@ class CompositeLoader extends FileLoader {
 	}
 
 	/**
+	 * Sets the database table used by the
+	 * loaded.
+	 *
+	 * @param  string  $databaseTable
+	 */
+	public function setDatabaseTable($databaseTable)
+	{
+		$this->databaseTable = $databaseTable;
+	}
+
+	/**
 	 * Load the given configuration group.
 	 *
 	 * @param  string  $environment
@@ -73,10 +80,17 @@ class CompositeLoader extends FileLoader {
 	 */
 	public function load($environment, $group, $namespace = null)
 	{
+		// If the database has not been set on the config
+		// loader, we simply default to our parent - file
+		// loading.
+		if ( ! isset($this->database))
+		{
+			return parent::load($environment, $group, $namespace);
+		}
+
 		$items = array();
 
 		$query = $this->database->from($this->databaseTable);
-
 		$query
 		    ->where('environment', '=', $environment)
 		    ->where('group', '=', $group);
@@ -101,7 +115,6 @@ class CompositeLoader extends FileLoader {
 		}
 
 		$parentItems = parent::load($environment, $group, $namespace);
-		var_dump($parentItems);
 
 		return array_replace_recursive($parentItems, $items);
 	}

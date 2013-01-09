@@ -42,14 +42,14 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	{
 		$this->filesystem    = m::mock('Illuminate\Filesystem');
 		$this->defaultPath   = __DIR__;
-		$this->database      = m::mock('Illuminate\Database\Connection');
+
+		$this->loader        = new CompositeLoader($this->filesystem, $this->defaultPath);
+
+		$this->database = m::mock('Illuminate\Database\Connection');
+		$this->loader->setDatabase($this->database);
+
 		$this->databaseTable = 'config';
-		$this->loader        = new CompositeLoader(
-			$this->filesystem,
-			$this->defaultPath,
-			$this->database,
-			$this->databaseTable
-		);
+		$this->loader->setDatabaseTable($this->databaseTable);
 	}
 
 	/**
