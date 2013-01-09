@@ -20,6 +20,7 @@
 
 use Illuminate\Config\FileLoader;
 use Illuminate\Database\Connection;
+use Illuminate\Filesystem;
 
 class CompositeLoader extends FileLoader {
 
@@ -31,6 +32,13 @@ class CompositeLoader extends FileLoader {
 	protected $database;
 
 	/**
+	 * The config database table.
+	 *
+	 * @var string
+	 */
+	protected $databaseTable;
+
+	/**
 	 * Create a new composite configuration loader.
 	 *
 	 * @param  Illuminate\Filesystem  $files
@@ -38,10 +46,11 @@ class CompositeLoader extends FileLoader {
 	 * @param  Illuminate\Database\Connection  $database
 	 * @return void
 	 */
-	public function __construct(Filesystem $files, $defaultPath, $database)
+	public function __construct(Filesystem $files, $defaultPath, $database, $databaseTable)
 	{
 		parent::__construct($files, $defaultPath);
-		$this->database = $database;
+		$this->database      = $database;
+		$this->databaseTable = $databaseTable;
 	}
 
 	/**
@@ -52,6 +61,49 @@ class CompositeLoader extends FileLoader {
 	public function getDatabase()
 	{
 		return $this->database;
+	}
+
+	/**
+	 * Load the given configuration group.
+	 *
+	 * @param  string  $environment
+	 * @param  string  $group
+	 * @param  string  $namespace
+	 * @return array
+	 */
+	public function load($environment, $group, $namespace = null)
+	{
+		$items = array();
+
+		$query = $this->database->from($this->databaseTable);
+
+		$query
+		    ->where('environment', '=', $environment)
+		    ->where('group', '=', $group);
+
+		if (isset($namespace))
+		{
+			$query->where('namespace', '=', $namespace);
+		}
+		else
+		{
+			$query->whereNull($namespace);
+		}
+
+		$result = $query->get();
+
+		if ( ! empty($result))
+		{
+			foreach ($result as $result)
+			{
+				array_set($items, $result->item, $result->value);
+			}
+		}
+
+		$parentItems = parent::load($environment, $group, $namespace);
+		var_dump($parentItems);
+
+		return array_replace_recursive($parentItems, $items);
 	}
 
 }
