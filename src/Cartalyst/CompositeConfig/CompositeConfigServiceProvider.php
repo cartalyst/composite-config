@@ -20,7 +20,7 @@
 
 use Illuminate\Support\ServiceProvider;
 
-class CompositeConfigServiceProvider {
+class CompositeConfigServiceProvider extends ServiceProvider {
 
 	/**
 	 * Register the service provider.
