@@ -64,7 +64,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testLoadingFromDatabase()
 	{
-		$this->database->shouldReceive('from')->with($this->databaseTable)->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($this->database);
@@ -102,7 +102,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testMergingWithFileConfig()
 	{
-		$this->database->shouldReceive('from')->with($this->databaseTable)->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($this->database);
@@ -137,7 +137,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testDatabaseOverridesFilesystem()
 	{
-		$this->database->shouldReceive('from')->with($this->databaseTable)->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
 		$this->database->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($this->database);

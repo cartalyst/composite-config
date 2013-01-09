@@ -90,7 +90,7 @@ class CompositeLoader extends FileLoader {
 
 		$items = array();
 
-		$query = $this->database->from($this->databaseTable);
+		$query = $this->database->table($this->databaseTable);
 		$query
 		    ->where('environment', '=', $environment)
 		    ->where('group', '=', $group);
@@ -101,7 +101,7 @@ class CompositeLoader extends FileLoader {
 		}
 		else
 		{
-			$query->whereNull($namespace);
+			$query->whereNull('namespace');
 		}
 
 		$result = $query->get();
