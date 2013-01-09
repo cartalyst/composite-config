@@ -16,6 +16,7 @@ class MigrationCartalystCompositeConfigInstall extends Migration {
 			$table->string('environment');
 			$table->string('group');
 			$table->string('namespace')->nullable();
+			$table->string('item');
 			$table->text('value')->nullable();
 
 			$table->unique(array('environment', 'group', 'namespace'));
