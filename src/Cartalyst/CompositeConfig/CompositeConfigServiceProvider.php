@@ -36,7 +36,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 		// merge database configuration with file configuration.
 		if (method_exists($configLoader = $this->app['config.loader'], 'setDatabase') and isset($this->app['db']))
 		{
-			$configLoader->setDatabase($this->app['db']);
+			$configLoader->setDatabase($this->app['db']->connection());
 			$configLoader->setDatabaseTable('config');
 		}
 	}
