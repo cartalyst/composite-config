@@ -40,7 +40,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function setUp()
 	{
-		$this->filesystem    = m::mock('Illuminate\Filesystem');
+		$this->filesystem    = m::mock('Illuminate\Filesystem\Filesystem');
 		$this->defaultPath   = __DIR__;
 
 		$this->loader        = new CompositeLoader($this->filesystem, $this->defaultPath);

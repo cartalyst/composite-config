@@ -20,7 +20,7 @@
 
 use Illuminate\Config\FileLoader;
 use Illuminate\Database\Connection as DatabaseConnection;
-use Illuminate\Filesystem;
+use Illuminate\Filesystem\Filesystem;
 
 class CompositeLoader extends FileLoader {
 

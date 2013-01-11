@@ -37,6 +37,6 @@ if (class_exists('Cartalyst\CompositeConfig\CompositeLoader'))
 {
 	$app->bind('config.loader', function($app) use ($appPath)
 	{
-		return new Cartalyst\CompositeConfig\CompositeLoader(new Illuminate\Filesystem, $appPath.'/config');
+		return new Cartalyst\CompositeConfig\CompositeLoader(new Illuminate\Filesystem\Filesystem, $appPath.'/config');
 	});
 }
