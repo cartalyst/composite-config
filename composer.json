@@ -1,6 +1,6 @@
 {
 	"name": "cartalyst/composite-config",
-	"description": "Package allowing for creating objects with attributes, with mutators to get and set those attributes.",
+	"description": "Composite configuration allowing you to override filesystem configuration in a database.",
 	"keywords": ["platform", "ecommerce", "laravel", "bootstrap"],
 	"license": "BSD License (3-clause)",
 	"authors": [
@@ -12,8 +12,8 @@
 	"require": {
 		"php": ">=5.3.0",
 
-		"illuminate/database": "4.0.*",
-		"illuminate/config": "4.0.*"
+		"illuminate/config": "4.0.*",
+		"illuminate/database": "4.0.*"
 	},
 	"require-dev": {
 		"mockery/mockery": "0.7.2"
