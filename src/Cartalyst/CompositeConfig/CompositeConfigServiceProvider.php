@@ -29,9 +29,6 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		// Add the config as a package so migrations can be run
-		$this->package('cartalyst/composite-config', __DIR__.'/../..', 'cartalyst/composite-config');
-
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
 		if (method_exists($this->app['config.loader'], 'setDatabase') and isset($this->app['db']))

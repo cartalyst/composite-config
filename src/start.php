@@ -19,7 +19,7 @@
  */
 
 /**
- * Place the following in the start.php file of your
+ * Place the following in the bootstrap/start.php file of your
  * base application path.
  */
 
@@ -35,8 +35,8 @@
 
 if (class_exists('Cartalyst\CompositeConfig\CompositeLoader'))
 {
-	$app->bind('config.loader', function($app) use ($appPath)
+	$app->bind('config.loader', function($app)
 	{
-		return new Cartalyst\CompositeConfig\CompositeLoader(new Illuminate\Filesystem\Filesystem, $appPath.'/config');
+		return new Cartalyst\CompositeConfig\CompositeLoader(new Illuminate\Filesystem\Filesystem, $app['path'].'/config');
 	});
 }
