@@ -23,11 +23,11 @@ use Illuminate\Support\ServiceProvider;
 class CompositeConfigServiceProvider extends ServiceProvider {
 
 	/**
-	 * Register the service provider.
+	 * Bootstrap the application events.
 	 *
 	 * @return void
 	 */
-	public function register()
+	public function boot()
 	{
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
@@ -36,6 +36,19 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 			$this->app['config.loader']->setDatabase($this->app['db']->connection());
 			$this->app['config.loader']->setDatabaseTable('config');
 		}
+	}
+
+	/**
+	 * Register the service provider.
+	 *
+	 * @return void
+	 */
+	public function register()
+	{
+		$app->bind('config.loader', function($app)
+		{
+			return new Cartalyst\CompositeConfig\CompositeLoader(new Illuminate\Filesystem\Filesystem, $app['path'].'/config');
+		});
 	}
 
 }
