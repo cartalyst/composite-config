@@ -45,10 +45,14 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$app->bind('config.loader', function($app)
+		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
+
+		foreach ($this->app['config.loader']->getNamespaces() as $namespace => $hint)
 		{
-			return new Cartalyst\CompositeConfig\CompositeLoader(new Illuminate\Filesystem\Filesystem, $app['path'].'/config');
-		});
+			$compositeLoader->addNamespace($namespace, $hint);
+		}
+
+		$this->app->instance('config.loader', $compositeLoader);
 	}
 
 }
