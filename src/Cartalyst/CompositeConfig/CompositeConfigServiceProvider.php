@@ -29,6 +29,16 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
+		// We will grab the new loader and syncronize all of the namespaces.
+		$compositeLoader = $this->app['config.loader.composite'];
+		foreach ($this->app['config.loader']->getNamespaces() as $namespace => $hint)
+		{
+			$compositeLoader->addNamespace($namespace, $hint);
+		}
+
+		// Now we will set the config loader instance.
+		unset($this->app['config.loader.composite']);
+		$this->app->instance('config.loader', $compositeLoader);
 		$this->app['config']->setLoader($this->app['config.loader']);
 
 		// Set the database property on the composite loader so it will now
@@ -49,12 +59,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	{
 		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
 
-		foreach ($this->app['config.loader']->getNamespaces() as $namespace => $hint)
-		{
-			$compositeLoader->addNamespace($namespace, $hint);
-		}
-
-		$this->app->instance('config.loader', $compositeLoader);
+		$this->app->instance('config.loader.composite', $compositeLoader);
 	}
 
 }
