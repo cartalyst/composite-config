@@ -110,13 +110,28 @@ class CompositeLoader extends FileLoader {
 		{
 			foreach ($result as $result)
 			{
-				array_set($items, $result->item, $result->value);
+				array_set($items, $result->item, ($this->getJson($result->value) ?: $result->value));
 			}
 		}
 
 		$parentItems = parent::load($environment, $group, $namespace);
 
 		return array_replace_recursive($parentItems, $items);
+	}
+
+	/**
+	 * Returns the JSON value of the string.
+	 *
+	 * @param  string  $json
+	 * @return mixed
+	 */
+	protected function getJson($string)
+	{
+		$decoded = json_decode($string, true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) return false;
+
+		return $decoded;
 	}
 
 }

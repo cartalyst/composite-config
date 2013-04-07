@@ -83,17 +83,28 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$record2->item        = 'foo';
 		$record2->value       = 'bar';
 
-		$records = array($record1, $record2);
+		$record3 = new StdClass;
+		$record3->environment = 'local';
+		$record3->group       = 'foo';
+		$record3->namespace   = 'bar';
+		$record3->item        = 'fred';
+		$record3->value       = '{"waldo":true,"fred":"thud"}';
+
+		$records = array($record1, $record2, $record3);
 
 		$this->database->shouldReceive('get')->once()->andReturn($records);
 
 		$expected = array(
-			'baz' => array(
+			'baz'  => array(
 				'bat' => array(
 					'qux' => 'corge',
 				),
 			),
-			'foo' => 'bar',
+			'foo'  => 'bar',
+			'fred' => array(
+				'waldo' => true,
+				'fred'  => 'thud',
+			),
 		);
 
 		$actual = $this->loader->load('local', 'foo', 'bar');
