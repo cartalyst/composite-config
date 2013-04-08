@@ -43,10 +43,16 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
-		if (method_exists($this->app['config.loader'], 'setDatabase') and isset($this->app['db']))
+		if (method_exists($this->app['config.loader'], 'setDatabase'))
 		{
 			$this->app['config.loader']->setDatabase($this->app['db']->connection());
 			$this->app['config.loader']->setDatabaseTable('config');
+		}
+
+		// We'll also set the repository
+		if (method_exists($this->app['config.loader'], 'setRepository'))
+		{
+			$this->app['config.loader']->setRepository($this->app['config']);
 		}
 	}
 
