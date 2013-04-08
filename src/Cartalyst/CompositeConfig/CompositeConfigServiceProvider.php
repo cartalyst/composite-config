@@ -29,25 +29,20 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		// We will grab the new loader and syncronize all of the namespaces.
-		$compositeLoader = $this->app['config.loader.composite'];
-		foreach ($this->app['config.loader']->getNamespaces() as $namespace => $hint)
-		{
-			$compositeLoader->addNamespace($namespace, $hint);
-		}
+		$originalConfig = $this->app['config'];
+		$originalLoader = $config->getLoader();
 
-		// Now we will set the config loader instance.
-		unset($this->app['config.loader.composite']);
-		$this->app->instance('config.loader', $compositeLoader);
-		$this->app['config']->setLoader($this->app['config.loader']);
+		// Now, we'll create a new composite config loader
+		$newLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
+		$newLoader->setdatabase($this->app['db']->connection());
+		$newLoader->setDatabaseTable('config');
+		$this->app->instance('config.loader', $newLoader);
 
-		// Set the database property on the composite loader so it will now
-		// merge database configuration with file configuration.
-		if (method_exists($this->app['config.loader'], 'setDatabase') and isset($this->app['db']))
-		{
-			$this->app['config.loader']->setDatabase($this->app['db']->connection());
-			$this->app['config.loader']->setDatabaseTable('config');
-		}
+		// Note, we are intentionally not carrying across the cached items. This
+		// is because there may be a conflicting value in the database. If the items
+		// are cached, the database value will never be returned.
+		$newConfig = new Repository($app['config.loader'], $originalConfig->getEnvironment());
+		$this->app->instance('config', $newConfig);
 	}
 
 	/**
@@ -55,11 +50,6 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 *
 	 * @return void
 	 */
-	public function register()
-	{
-		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
-
-		$this->app->instance('config.loader.composite', $compositeLoader);
-	}
+	public function register() {}
 
 }

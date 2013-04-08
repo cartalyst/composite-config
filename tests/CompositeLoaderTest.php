@@ -193,4 +193,38 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($expected, $actual);
 	}
 
+	public function testPersistingExisting()
+	{
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($this->database);
+
+		$this->database->shouldReceive('first')->once()->andReturn(new StdClass);
+		$this->database->shouldReceive('update')->with(array('value' => '{"qux":"fred","thud":true}'))->once();
+
+		$this->loader->persist('local', 'foo', 'bar.baz', array('qux' => 'fred', 'thud' => true), 'corge');
+	}
+
+	public function testPersistingNew()
+	{
+		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($this->database);
+		$this->database->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($this->database);
+
+		$this->database->shouldReceive('first')->once()->andReturn(null);
+		$this->database->shouldReceive('insert')->with(array(
+			'environment' => 'local',
+			'group'       => 'foo',
+			'item'        => 'bar.baz',
+			'value'       => '{"qux":"fred","thud":true}',
+			'namespace'   => 'corge',
+		))->once();
+
+		$this->loader->persist('local', 'foo', 'bar.baz', array('qux' => 'fred', 'thud' => true), 'corge');
+	}
+
 }

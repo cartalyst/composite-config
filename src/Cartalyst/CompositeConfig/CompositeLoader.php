@@ -90,19 +90,7 @@ class CompositeLoader extends FileLoader {
 
 		$items = array();
 
-		$query = $this->database->table($this->databaseTable);
-		$query
-		    ->where('environment', '=', $environment)
-		    ->where('group', '=', $group);
-
-		if (isset($namespace))
-		{
-			$query->where('namespace', '=', $namespace);
-		}
-		else
-		{
-			$query->whereNull('namespace');
-		}
+		$query = $this->getGroupQuery($environment, $group, $namespace);
 
 		$result = $query->get();
 
@@ -120,6 +108,75 @@ class CompositeLoader extends FileLoader {
 	}
 
 	/**
+	 * Persist the given configuration to the database.
+	 *
+	 * @param  string  $environment
+	 * @param  string  $group
+	 * @param  string  $name
+	 * @param  mixed   $value
+	 * @param  string  $namespace
+	 * @return void
+	 */
+	public function persist($environment, $group, $item, $value, $namespace = null)
+	{
+		// If there is no databse, we'll not persist anything which will make
+		// the configuration act as if this package was not installed.
+		if ( ! isset($this->database)) return;
+
+		$query = $this
+			->getGroupQuery($environment, $group, $namespace)
+			->where('item', '=', $item);
+
+		// Firstly, we'll see if the configuration exists
+		$existing = $query->first();
+
+		if ($existing)
+		{
+			// We'll update an existing record
+			$query->update(array('value' => $this->prepareValue($value)));
+		}
+		else
+		{
+			// Prepare our data
+			$data = compact('environment', 'group', 'item');
+			$data['value'] = $this->prepareValue($value);
+			if (isset($namespace)) $data['namespace'] = $namespace;
+
+			$this
+				->database->table($this->databaseTable)
+				->insert($data);
+		}
+	}
+
+	/**
+	 * Returns a query builder object for the given environment, group
+	 * and namespace.
+	 *
+	 * @param  string  $environment
+	 * @param  string  $group
+	 * @param  string  $namespace
+	 * @return Illuminate\Database\Query  $query
+	 */
+	protected function getGroupQuery($environment, $group, $namespace)
+	{
+		$query = $this->database->table($this->databaseTable);
+		$query
+		    ->where('environment', '=', $environment)
+		    ->where('group', '=', $group);
+
+		if (isset($namespace))
+		{
+			$query->where('namespace', '=', $namespace);
+		}
+		else
+		{
+			$query->whereNull('namespace');
+		}
+
+		return $query;
+	}
+
+	/**
 	 * Returns the JSON value of the string.
 	 *
 	 * @param  string  $json
@@ -132,6 +189,29 @@ class CompositeLoader extends FileLoader {
 		if (json_last_error() !== JSON_ERROR_NONE) return false;
 
 		return $decoded;
+	}
+
+	/**
+	 * Prepares a value to be persisted in the database.
+	 *
+	 * @param  mixed  $value
+	 * @return mixed
+	 */
+	protected function prepareValue($value)
+	{
+		// We'll JSON encode arrays
+		if (is_array($value))
+		{
+			return json_encode($value);
+		}
+
+		// Strings, "null", "true", integers etc...
+		if ( ! is_object($value))
+		{
+			return $value;
+		}
+
+		throw new \InvalidArgumentException('Cannot persist value of type ['.gettype($value).'] to database.');
 	}
 
 }
