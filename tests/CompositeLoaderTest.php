@@ -64,10 +64,10 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testLoadingFromDatabase()
 	{
-		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
 
 		$record1 = new StdClass;
 		$record1->environment = 'local';
@@ -92,7 +92,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 		$records = array($record1, $record2, $record3);
 
-		$this->database->shouldReceive('get')->once()->andReturn($records);
+		$query->shouldReceive('get')->once()->andReturn($records);
 
 		$expected = array(
 			'baz'  => array(
@@ -113,10 +113,10 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testMergingWithFileConfig()
 	{
-		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
 
 		$record1 = new StdClass;
 		$record1->environment = 'local';
@@ -127,7 +127,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 		$records = array($record1);
 
-		$this->database->shouldReceive('get')->once()->andReturn($records);
+		$query->shouldReceive('get')->once()->andReturn($records);
 
 		// Configure file based loading
 		$this->loader->addNamespace('bar', 'path/to/bar');
@@ -148,10 +148,10 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testDatabaseOverridesFilesystem()
 	{
-		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
 
 		$record1 = new StdClass;
 		$record1->environment = 'local';
@@ -169,7 +169,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 		$records = array($record1, $record2);
 
-		$this->database->shouldReceive('get')->once()->andReturn($records);
+		$query->shouldReceive('get')->once()->andReturn($records);
 
 		// Configure file based loading
 		$this->loader->addNamespace('bar', 'path/to/bar');
@@ -195,28 +195,31 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testPersistingExisting()
 	{
-		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
 
-		$this->database->shouldReceive('first')->once()->andReturn(new StdClass);
-		$this->database->shouldReceive('update')->with(array('value' => '{"qux":"fred","thud":true}'))->once();
+		$query->shouldReceive('first')->once()->andReturn(new StdClass);
+		$query->shouldReceive('update')->with(array('value' => '{"qux":"fred","thud":true}'))->once();
+
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
 
 		$this->loader->persist('local', 'foo', 'bar.baz', array('qux' => 'fred', 'thud' => true), 'corge');
 	}
 
 	public function testPersistingNew()
 	{
-		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($this->database);
-		$this->database->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($this->database);
+		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
 
-		$this->database->shouldReceive('first')->once()->andReturn(null);
-		$this->database->shouldReceive('insert')->with(array(
+		$query->shouldReceive('first')->once()->andReturn(null);
+		$query->shouldReceive('insert')->with(array(
 			'environment' => 'local',
 			'group'       => 'foo',
 			'item'        => 'bar.baz',
@@ -224,7 +227,27 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 			'namespace'   => 'corge',
 		))->once();
 
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
+
 		$this->loader->persist('local', 'foo', 'bar.baz', array('qux' => 'fred', 'thud' => true), 'corge');
+	}
+
+	public function testPersistingNullRemovesEntry()
+	{
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
+
+		$query->shouldReceive('first')->once()->andReturn(new StdClass);
+		$query->shouldReceive('delete')->once();
+
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
+
+		$this->loader->persist('local', 'foo', 'bar.baz', null, 'corge');
 	}
 
 }

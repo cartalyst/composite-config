@@ -19,6 +19,7 @@
  */
 
 use Illuminate\Config\FileLoader;
+use Illuminate\Config\Repository;
 use Illuminate\Database\Connection as DatabaseConnection;
 use Illuminate\Filesystem\Filesystem;
 
@@ -39,35 +40,30 @@ class CompositeLoader extends FileLoader {
 	protected $databaseTable;
 
 	/**
-	 * Sets the database connection.
+	 * The config repository instance.
 	 *
-	 * @param  Illuminate\Database\Connection  $database
+	 * @var Illuminate\Config\Repository
+	 */
+	protected $repository;
+
+	/**
+	 * Sets a config value for the loader (i.e. permanently).
+	 *
+	 * @param  string  $key
+	 * @param  mixed   $value
 	 * @return void
 	 */
-	public function setDatabase(DatabaseConnection $database)
+	public function set($key, $value = null)
 	{
-		$this->database = $database;
-	}
+		if ( ! isset($this->repository))
+		{
+			throw new \RuntimeException("Repository is required to set a config value. Use persist() instead.");
+		}
 
-	/**
-	 * Returns the database connection.
-	 *
-	 * @return Illuminate\Database\Connection
-	 */
-	public function getDatabase()
-	{
-		return $this->database;
-	}
+		list($namespace, $group, $item) = $this->repository->parseKey($key);
+		$environment = $this->repository->getEnvironment();
 
-	/**
-	 * Sets the database table used by the
-	 * loaded.
-	 *
-	 * @param  string  $databaseTable
-	 */
-	public function setDatabaseTable($databaseTable)
-	{
-		$this->databaseTable = $databaseTable;
+		$this->persist($environment, $group, $item, $value, $namespace);
 	}
 
 	/**
@@ -117,7 +113,7 @@ class CompositeLoader extends FileLoader {
 	 * @param  string  $namespace
 	 * @return void
 	 */
-	public function persist($environment, $group, $item, $value, $namespace = null)
+	public function persist($environment, $group, $item, $value = null, $namespace = null)
 	{
 		// If there is no databse, we'll not persist anything which will make
 		// the configuration act as if this package was not installed.
@@ -132,10 +128,17 @@ class CompositeLoader extends FileLoader {
 
 		if ($existing)
 		{
-			// We'll update an existing record
-			$query->update(array('value' => $this->prepareValue($value)));
+			if (isset($value))
+			{
+				// We'll update an existing record
+				$query->update(array('value' => $this->prepareValue($value)));
+			}
+			else
+			{
+				$query->delete();
+			}
 		}
-		else
+		elseif (isset($value))
 		{
 			// Prepare our data
 			$data = compact('environment', 'group', 'item');
@@ -146,6 +149,53 @@ class CompositeLoader extends FileLoader {
 				->database->table($this->databaseTable)
 				->insert($data);
 		}
+
+		// We will remove the cache from our repository so that it's
+		// forced to refresh it next time.
+		$this->removeRepositoryCache($group, $item, $namespace);
+	}
+
+	/**
+	 * Returns the database connection.
+	 *
+	 * @return Illuminate\Database\Connection
+	 */
+	public function getDatabase()
+	{
+		return $this->database;
+	}
+
+	/**
+	 * Sets the database connection.
+	 *
+	 * @param  Illuminate\Database\Connection  $database
+	 * @return void
+	 */
+	public function setDatabase(DatabaseConnection $database)
+	{
+		$this->database = $database;
+	}
+
+	/**
+	 * Set the repository instance on the composite loader.
+	 *
+	 * @param  Illuminate\Config\Repository  $repository
+	 * @return void
+	 */
+	public function setRepository(Repository $repository)
+	{
+		$this->repository = $repository;
+	}
+
+	/**
+	 * Sets the database table used by the
+	 * loaded.
+	 *
+	 * @param  string  $databaseTable
+	 */
+	public function setDatabaseTable($databaseTable)
+	{
+		$this->databaseTable = $databaseTable;
 	}
 
 	/**
@@ -212,6 +262,29 @@ class CompositeLoader extends FileLoader {
 		}
 
 		throw new \InvalidArgumentException('Cannot persist value of type ['.gettype($value).'] to database.');
+	}
+
+	/**
+	 * Removes the repository cache for the given item.
+	 *
+	 * @param  string  $group
+	 * @param  string  $item
+	 * @param  string  $namespace
+	 * @return void
+	 */
+	protected function removeRepositoryCache($group, $item, $namespace = null)
+	{
+		// If the repository exists, we'll
+		if ( ! isset($this->repository)) return;
+
+		$key = "{$group}.{$item}";
+
+		if (isset($namespace))
+		{
+			$key = "{$namespace}::{$key}";
+		}
+
+		$this->repository->set($key, null);
 	}
 
 }
