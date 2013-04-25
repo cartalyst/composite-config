@@ -1,4 +1,4 @@
-<?php
+<?php namespace Cartalyst\CompositeConfig\Tests;
 /**
  * Part of the Composite Config package.
  *
@@ -20,6 +20,8 @@
 
 use Mockery as m;
 use Cartalyst\CompositeConfig\CompositeLoader;
+use PHPUnit_Framework_TestCase;
+use stdClass;
 
 class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
@@ -69,21 +71,21 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
 
-		$record1 = new StdClass;
+		$record1 = new stdClass;
 		$record1->environment = 'local';
 		$record1->group       = 'foo';
 		$record1->namespace   = 'bar';
 		$record1->item        = 'baz.bat.qux';
 		$record1->value       = 'corge';
 
-		$record2 = new StdClass;
+		$record2 = new stdClass;
 		$record2->environment = 'local';
 		$record2->group       = 'foo';
 		$record2->namespace   = 'bar';
 		$record2->item        = 'foo';
 		$record2->value       = 'bar';
 
-		$record3 = new StdClass;
+		$record3 = new stdClass;
 		$record3->environment = 'local';
 		$record3->group       = 'foo';
 		$record3->namespace   = 'bar';
@@ -118,7 +120,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
 
-		$record1 = new StdClass;
+		$record1 = new stdClass;
 		$record1->environment = 'local';
 		$record1->group       = 'foo';
 		$record1->namespace   = 'bar';
@@ -153,14 +155,14 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
 
-		$record1 = new StdClass;
+		$record1 = new stdClass;
 		$record1->environment = 'local';
 		$record1->group       = 'foo';
 		$record1->namespace   = 'bar';
 		$record1->item        = 'baz';
 		$record1->value       = 'bat';
 
-		$record2 = new StdClass;
+		$record2 = new stdClass;
 		$record2->environment = 'local';
 		$record2->group       = 'foo';
 		$record2->namespace   = 'bar';
@@ -201,7 +203,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
 
-		$query->shouldReceive('first')->once()->andReturn(new StdClass);
+		$query->shouldReceive('first')->once()->andReturn(new stdClass);
 		$query->shouldReceive('update')->with(array('value' => '{"qux":"fred","thud":true}'))->once();
 
 		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
@@ -241,7 +243,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
 
-		$query->shouldReceive('first')->once()->andReturn(new StdClass);
+		$query->shouldReceive('first')->once()->andReturn(new stdClass);
 		$query->shouldReceive('delete')->once();
 
 		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
