@@ -47,6 +47,15 @@ class CompositeLoader extends FileLoader {
 	protected $repository;
 
 	/**
+	 * Array of cached items, persisted between loading
+	 * and cascading configuration so we can override
+	 * cascaded file configuration with databas configuration.
+	 *
+	 * @var array
+	 */
+	protected $cachedItems = array();
+
+	/**
 	 * Sets a config value for the loader (i.e. permanently).
 	 *
 	 * @param  string  $key
@@ -98,9 +107,37 @@ class CompositeLoader extends FileLoader {
 			}
 		}
 
+		$cacheKey = $this->getCacheKey($environment, $group, $namespace);
+		array_set($this->cachedItems, $cacheKey, $items);
+
 		$parentItems = parent::load($environment, $group, $namespace);
 
 		return array_replace_recursive($parentItems, $items);
+	}
+
+	/**
+	 * Apply any cascades to an array of package options.
+	 *
+	 * @param  string  $env
+	 * @param  string  $package
+	 * @param  string  $group
+	 * @param  array   $items
+	 * @return array
+	 */
+	public function cascadePackage($env, $package, $group, $items)
+	{
+		// First, we will retrieve the items from the
+		// parent file loader.
+		$items = parent::cascadePackage($env, $package, $group, $items);
+
+		// When we queried before, we cached our results. This
+		// is because database results must override all cascaded
+		// file results. We'll now replace the results again here
+		// so our database rules all!
+		$cacheKey    = $this->getCacheKey($env, $group, $package);
+		$cachedItems = array_get($this->cachedItems, $cacheKey, array());
+
+		return array_replace_recursive($items, $cachedItems);
 	}
 
 	/**
@@ -285,6 +322,21 @@ class CompositeLoader extends FileLoader {
 		}
 
 		$this->repository->set($key, null);
+	}
+
+	/**
+	 * Returns a cache key for the given environment,
+	 * group and namespace. Used when overriding cascaded
+	 * file configuration in the database.
+	 *
+	 * @param  string  $environment
+	 * @param  string  $group
+	 * @param  string  $namespace
+	 * @return string
+	 */
+	protected function getCacheKey($environment, $group, $namespace = null)
+	{
+		return implode('.', func_get_args());
 	}
 
 }
