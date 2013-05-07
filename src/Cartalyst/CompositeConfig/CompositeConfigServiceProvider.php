@@ -29,31 +29,26 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
+		$originalLoader = $this->app['config']->getLoader();
+
 		// We will grab the new loader and syncronize all of the namespaces.
 		$compositeLoader = $this->app['config.loader.composite'];
-		foreach ($this->app['config.loader']->getNamespaces() as $namespace => $hint)
+		foreach ($originalLoader->getNamespaces() as $namespace => $hint)
 		{
 			$compositeLoader->addNamespace($namespace, $hint);
 		}
 
 		// Now we will set the config loader instance.
 		unset($this->app['config.loader.composite']);
-		$this->app->instance('config.loader', $compositeLoader);
-		$this->app['config']->setLoader($this->app['config.loader']);
+		$this->app['config']->setLoader($compositeLoader);
 
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
-		if (method_exists($this->app['config.loader'], 'setDatabase'))
-		{
-			$this->app['config.loader']->setDatabase($this->app['db']->connection());
-			$this->app['config.loader']->setDatabaseTable('config');
-		}
+		$compositeLoader->setDatabase($this->app['db']->connection());
+		$compositeLoader->setDatabaseTable('config');
 
 		// We'll also set the repository
-		if (method_exists($this->app['config.loader'], 'setRepository'))
-		{
-			$this->app['config.loader']->setRepository($this->app['config']);
-		}
+		$compositeLoader->setRepository($this->app['config']);
 	}
 
 	/**
