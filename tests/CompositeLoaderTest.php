@@ -235,6 +235,29 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$this->loader->persist('local', 'foo', 'bar.baz', array('qux' => 'fred', 'thud' => true), 'corge');
 	}
 
+	public function testPersistingStoresAllValuesAsJson()
+	{
+		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
+
+		$query->shouldReceive('first')->once()->andReturn(null);
+		$query->shouldReceive('insert')->with(array(
+			'environment' => 'local',
+			'group'       => 'foo',
+			'item'        => 'bar.baz',
+			'value'       => 'false',
+			'namespace'   => 'corge',
+		))->once();
+
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
+
+		$this->loader->persist('local', 'foo', 'bar.baz', false, 'corge');
+	}
+
 	public function testPersistingNullRemovesEntry()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));

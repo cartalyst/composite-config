@@ -286,19 +286,10 @@ class CompositeLoader extends FileLoader {
 	 */
 	protected function prepareValue($value)
 	{
-		// We'll JSON encode arrays
-		if (is_array($value))
-		{
-			return json_encode($value);
-		}
-
-		// Strings, "null", "true", integers etc...
-		if ( ! is_object($value))
-		{
-			return $value;
-		}
-
-		throw new \InvalidArgumentException('Cannot persist value of type ['.gettype($value).'] to database.');
+		// We will always JSON encode the value. This allows us to store "null", "true"
+		// and "false" values in the database (as an example), which may mean completely
+		// different things.
+		return json_encode($value);
 	}
 
 	/**
