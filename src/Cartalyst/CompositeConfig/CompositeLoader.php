@@ -103,7 +103,7 @@ class CompositeLoader extends FileLoader {
 		{
 			foreach ($result as $result)
 			{
-				array_set($items, $result->item, ($this->getJson($result->value) ?: $result->value));
+				array_set($items, $result->item, $this->parseValue($result->value));
 			}
 		}
 
@@ -264,16 +264,17 @@ class CompositeLoader extends FileLoader {
 	}
 
 	/**
-	 * Returns the JSON value of the string.
+	 * Parses a value from the database and attempts to return it's
+	 * JSON decoded value.
 	 *
 	 * @param  string  $json
 	 * @return mixed
 	 */
-	protected function getJson($string)
+	protected function parseValue($value)
 	{
-		$decoded = json_decode($string, true);
+		$decoded = json_decode($value, true);
 
-		if (json_last_error() !== JSON_ERROR_NONE) return false;
+		if (json_last_error() !== JSON_ERROR_NONE) return $value;
 
 		return $decoded;
 	}
