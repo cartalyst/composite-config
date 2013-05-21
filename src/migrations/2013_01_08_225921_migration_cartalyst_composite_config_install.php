@@ -13,6 +13,7 @@ class MigrationCartalystCompositeConfigInstall extends Migration {
 	{
 		Schema::create('config', function($table)
 		{
+			$table->engine = 'InnoDB';
 			$table->string('environment');
 			$table->string('group');
 			$table->string('namespace')->nullable();
