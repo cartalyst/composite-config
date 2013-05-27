@@ -40,6 +40,19 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	 *
 	 * @return void
 	 */
+	public static function setUpBeforeClass()
+	{
+		/**
+		 * @todo Remove when https://github.com/laravel/framework/pull/1426 gets merged.
+		 */
+		require_once __DIR__.'/stubs/TestDatabaseConnection.php';
+	}
+
+	/**
+	 * Setup resources and dependencies.
+	 *
+	 * @return void
+	 */
 	public function setUp()
 	{
 		$this->filesystem    = m::mock('Illuminate\Filesystem\Filesystem');
@@ -47,7 +60,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 		$this->loader        = new CompositeLoader($this->filesystem, $this->defaultPath);
 
-		$this->database = m::mock('Illuminate\Database\Connection');
+		$this->database = m::mock('TestDatabaseConnection');
 		$this->loader->setDatabase($this->database);
 
 		$this->databaseTable = 'config';
