@@ -80,9 +80,19 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testLoadingFromDatabase()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
-		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('whereNested')->with(m::on(function($callback) use ($query)
+		{
+			$query->shouldReceive('where')->with('environment', '=', '*')->once()->andReturn($query);
+
+			$query->shouldReceive('orWhere')->with('environment', '=', 'local')->once()->andReturn($query);
+
+			$callback($query);
+
+			return true;
+		}))->once();
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
+		$query->shouldReceive('orderBy')->with('environment')->once()->andReturn($query);
 
 		$record1 = new stdClass;
 		$record1->environment = 'local';
@@ -129,9 +139,20 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testMergingWithFileConfig()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
-		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('whereNested')->with(m::on(function($callback) use ($query)
+		{
+			$query->shouldReceive('where')->with('environment', '=', '*')->once()->andReturn($query);
+
+			$query->shouldReceive('orWhere')->with('environment', '=', 'local')->once()->andReturn($query);
+
+			$callback($query);
+
+			return true;
+		}))->once();
+
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
+		$query->shouldReceive('orderBy')->with('environment')->once()->andReturn($query);
 
 		$record1 = new stdClass;
 		$record1->environment = 'local';
@@ -164,9 +185,19 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testDatabaseOverridesFilesystem()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
-		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('whereNested')->with(m::on(function($callback) use ($query)
+		{
+			$query->shouldReceive('where')->with('environment', '=', '*')->once()->andReturn($query);
+
+			$query->shouldReceive('orWhere')->with('environment', '=', 'local')->once()->andReturn($query);
+
+			$callback($query);
+
+			return true;
+		}))->once();
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
+		$query->shouldReceive('orderBy')->with('environment')->once()->andReturn($query);
 
 		$record1 = new stdClass;
 		$record1->environment = 'local';
