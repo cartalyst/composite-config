@@ -60,9 +60,10 @@ class CompositeLoader extends FileLoader {
 	 *
 	 * @param  string  $key
 	 * @param  mixed   $value
+	 * @param  string  $environment
 	 * @return void
 	 */
-	public function set($key, $value = null)
+	public function set($key, $value = null, $environment = null)
 	{
 		if ( ! isset($this->repository))
 		{
@@ -70,7 +71,7 @@ class CompositeLoader extends FileLoader {
 		}
 
 		list($namespace, $group, $item) = $this->repository->parseKey($key);
-		$environment = $this->repository->getEnvironment();
+		$environment = $environment ? $environment : $this->repository->getEnvironment();
 
 		$this->persist($environment, $group, $item, $value, $namespace);
 	}
@@ -157,7 +158,7 @@ class CompositeLoader extends FileLoader {
 		if ( ! isset($this->database)) return;
 
 		$query = $this
-			->getGroupQuery($environment, $group, $namespace)
+			->getGroupQuery($environment, $group, $namespace, false)
 			->where('item', '=', $item);
 
 		// Firstly, we'll see if the configuration exists
@@ -242,14 +243,31 @@ class CompositeLoader extends FileLoader {
 	 * @param  string  $environment
 	 * @param  string  $group
 	 * @param  string  $namespace
+	 * @param  string  $fallback
 	 * @return Illuminate\Database\Query  $query
 	 */
-	protected function getGroupQuery($environment, $group, $namespace)
+	protected function getGroupQuery($environment, $group, $namespace, $fallback = true)
 	{
 		$query = $this->database->table($this->databaseTable);
-		$query
-		    ->where('environment', '=', $environment)
-		    ->where('group', '=', $group);
+
+		if ($fallback === true)
+		{
+			$query->whereNested(function($query) use ($environment)
+			{
+				$query->where('environment', '=', '*');
+
+				if ($environment != '*')
+				{
+					$query->orWhere('environment', '=', $environment);
+				}
+			});
+		}
+		else
+		{
+			$query->where('environment', '=', $environment);
+		}
+
+		$query->where('group', '=', $group);
 
 		if (isset($namespace))
 		{
@@ -258,6 +276,11 @@ class CompositeLoader extends FileLoader {
 		else
 		{
 			$query->whereNull('namespace');
+		}
+
+		if ($fallback === true)
+		{
+			$query->orderBy('environment');
 		}
 
 		return $query;
