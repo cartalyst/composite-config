@@ -44,8 +44,11 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
-		$compositeLoader->setDatabase($this->app['db']->connection());
-		$compositeLoader->setDatabaseTable('config');
+		if ($this->databaseIsReady())
+		{
+			$compositeLoader->setDatabase($this->app['db']->connection());
+			$compositeLoader->setDatabaseTable('config');
+		}
 
 		// We'll also set the repository
 		$compositeLoader->setRepository($this->app['config']);
@@ -61,6 +64,20 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
 
 		$this->app->instance('config.loader.composite', $compositeLoader);
+	}
+
+	protected function databaseIsReady()
+	{
+		try
+		{
+			$this->app['db']->connection()->table('config')->get();
+		}
+		catch (\PDOException $e)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 }
