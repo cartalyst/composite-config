@@ -16,7 +16,7 @@ class MigrationCartalystCompositeConfigInstall extends Migration {
 			$table->string('environment');
 			$table->string('group');
 			$table->string('namespace')->nullable();
-			$table->string('item');
+			$table->string('item')->nullable();
 			$table->text('value')->nullable();
 
 			// We'll need to ensure that MySQL uses the InnoDB engine to

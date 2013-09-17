@@ -113,7 +113,7 @@ class CompositeLoader extends FileLoader {
 
 		$parentItems = parent::load($environment, $group, $namespace);
 
-		return array_replace_recursive($parentItems, $items);
+    return ( is_array($items) ) ? array_replace_recursive($parentItems, $items) : $parentItems;
 	}
 
 	/**
