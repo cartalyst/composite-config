@@ -29,6 +29,8 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
+		$this->package('cartalyst/composite-config', 'cartalyst/composite-config');
+
 		$originalLoader = $this->app['config']->getLoader();
 
 		// We will grab the new loader and syncronize all of the namespaces.
@@ -38,14 +40,19 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 			$compositeLoader->addNamespace($namespace, $hint);
 		}
 
+		$table = $this->app['config']['cartalyst/composite-config::table'];
+
 		// Now we will set the config loader instance.
 		unset($this->app['config.loader.composite']);
 		$this->app['config']->setLoader($compositeLoader);
 
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
-		$compositeLoader->setDatabase($this->app['db']->connection());
-		$compositeLoader->setDatabaseTable('config');
+		if ($this->databaseIsReady($table))
+		{
+			$compositeLoader->setDatabase($this->app['db']->connection());
+			$compositeLoader->setDatabaseTable($table);
+		}
 
 		// We'll also set the repository
 		$compositeLoader->setRepository($this->app['config']);
@@ -61,6 +68,20 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
 
 		$this->app->instance('config.loader.composite', $compositeLoader);
+	}
+
+	protected function databaseIsReady($table)
+	{
+		try
+		{
+			$this->app['db']->connection()->table($table)->get();
+		}
+		catch (\Exception $e)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 }
