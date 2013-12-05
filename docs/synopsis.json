@@ -1,0 +1,7 @@
+{
+	"name" : "Composite Config",
+	"branch" : "master",
+	"github" : "cartalyst/composite-config",
+	"travis" : false,
+	"demo" : null
+}
