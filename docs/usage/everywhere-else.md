@@ -33,7 +33,7 @@ To set configuration at runtime, use
 
 During that request, calling `$config->get($key);` will return the value you have set.
 
-**Note:** Configuration values that are set at run-time are only set for the current request, and will not be carried over to subsequent requests.
+> **Note:** Configuration values that are set at run-time are only set for the current request, and will not be carried over to subsequent requests.
 
 #### 2. Persisting
 
@@ -41,7 +41,7 @@ To set persisting configuration at runtime, use
 
 	$config->getLoader()->set($key, $value);
 
-**Note:** When persisting a config item, the value will be (by default) persisted for the current environment only.
+> **Note:** When persisting a config item, the value will be (by default) persisted for the current environment only.
 Ex. if you're running in the 'local' environment and switch to 'production', your item won't load.
 Overcoming this is easy, just provide '*' as the third parameter - `$config->getLoader()->set($key, $value, '*');` and it will work for all environments.
 
