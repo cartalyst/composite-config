@@ -4,7 +4,7 @@ Our composite config package enhances `illuminate/config` to allow configuration
 
 This is super useful for building user interfaces that facilitate editing configuration for an app. Because it does not change the API for retrieving configuration items, it degrades gracefully to the filesystem if not present and requires zero changes to the places which use the configuration items.
 
-Part of the Cartalyst Arsenal & licensed [OSI BSD 3](license.md). Code well, rock on.
+Part of the Cartalyst Arsenal & licensed [OSI BSD 3](license.txt). Code well, rock on.
 
 ##Package Story
 
