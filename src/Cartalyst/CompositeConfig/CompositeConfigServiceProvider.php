@@ -52,7 +52,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 		{
 			$compositeLoader->setDatabase($this->app['db']->connection());
 			$compositeLoader->setDatabaseTable($table);
-			$compositeLoader->cacheConfig();
+			$compositeLoader->cacheConfigs();
 		}
 
 		// We'll also set the repository

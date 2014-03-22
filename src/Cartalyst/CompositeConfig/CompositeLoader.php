@@ -162,9 +162,6 @@ class CompositeLoader extends FileLoader {
 	 */
 	public function persist($environment, $group, $item, $value = null, $namespace = null)
 	{
-		// Purge cache
-		\Cache::forget('cartalyst.config');
-
 		// If there is no databse, we'll not persist anything which will make
 		// the configuration act as if this package was not installed.
 		if ( ! isset($this->database)) return;
@@ -253,9 +250,9 @@ class CompositeLoader extends FileLoader {
 	 *
 	 * @return void
 	 */
-	public function cacheConfig()
+	public function cacheConfigs()
 	{
-		$configs = $this->database->table($this->databaseTable)->remember(280, 'cartalyst.config')->get();
+		$configs = $this->database->table($this->databaseTable)->rememberForever('cartalyst.config')->get();
 
 		$cachedConfigs = array();
 
@@ -368,6 +365,9 @@ class CompositeLoader extends FileLoader {
 		}
 
 		$this->repository->set($key, null);
+
+		// Purge cached configurations
+		$this->database->getCacheManager()->forget('cartalyst.config');
 	}
 
 	/**
