@@ -48,10 +48,11 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
-		if ($this->databaseIsReady($table))
+		if ($this->app['db']->connection()->getSchemaBuilder()->hasTable($table))
 		{
 			$compositeLoader->setDatabase($this->app['db']->connection());
 			$compositeLoader->setDatabaseTable($table);
+			$compositeLoader->cacheConfig();
 		}
 
 		// We'll also set the repository
@@ -68,20 +69,6 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
 
 		$this->app->instance('config.loader.composite', $compositeLoader);
-	}
-
-	protected function databaseIsReady($table)
-	{
-		try
-		{
-			$this->app['db']->connection()->table($table)->get();
-		}
-		catch (\Exception $e)
-		{
-			return false;
-		}
-
-		return true;
 	}
 
 }

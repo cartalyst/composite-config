@@ -56,6 +56,13 @@ class CompositeLoader extends FileLoader {
 	protected $cachedItems = array();
 
 	/**
+	 * Cached database items.
+	 *
+	 * @var array
+	 */
+	protected $cachedConfigs = array();
+
+	/**
 	 * Sets a config value for the loader (i.e. permanently).
 	 *
 	 * @param  string  $key
@@ -96,9 +103,11 @@ class CompositeLoader extends FileLoader {
 
 		$items = array();
 
-		$query = $this->getGroupQuery($environment, $group, $namespace);
+		// Environment specific configs
+		$result = array_get($this->cachedConfigs, "{$environment}.{$namespace}.{$group}", array());
 
-		$result = $query->get();
+		// Merge global configs
+		$result = array_merge($result, array_get($this->cachedConfigs, "*.{$namespace}.{$group}", array()));
 
 		if ( ! empty($result))
 		{
@@ -153,6 +162,9 @@ class CompositeLoader extends FileLoader {
 	 */
 	public function persist($environment, $group, $item, $value = null, $namespace = null)
 	{
+		// Purge cache
+		\Cache::forget('cartalyst.config');
+
 		// If there is no databse, we'll not persist anything which will make
 		// the configuration act as if this package was not installed.
 		if ( ! isset($this->database)) return;
@@ -234,6 +246,25 @@ class CompositeLoader extends FileLoader {
 	public function setDatabaseTable($databaseTable)
 	{
 		$this->databaseTable = $databaseTable;
+	}
+
+	/**
+	 * Cache all configurations.
+	 *
+	 * @return void
+	 */
+	public function cacheConfig()
+	{
+		$configs = $this->database->table($this->databaseTable)->remember(280, 'cartalyst.config')->get();
+
+		$cachedConfigs = array();
+
+		foreach ($configs as $key => $config)
+		{
+			$cachedConfigs["{$config->environment}.{$config->namespace}.{$config->group}"][$config->item] = $config;
+		}
+
+		$this->cachedConfigs = $cachedConfigs;
 	}
 
 	/**
