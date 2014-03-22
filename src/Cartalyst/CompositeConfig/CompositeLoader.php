@@ -56,6 +56,13 @@ class CompositeLoader extends FileLoader {
 	protected $cachedItems = array();
 
 	/**
+	 * Cached database items.
+	 *
+	 * @var array
+	 */
+	protected $cachedConfigs = array();
+
+	/**
 	 * Sets a config value for the loader (i.e. permanently).
 	 *
 	 * @param  string  $key
@@ -96,9 +103,11 @@ class CompositeLoader extends FileLoader {
 
 		$items = array();
 
-		$query = $this->getGroupQuery($environment, $group, $namespace);
+		// Environment specific configs
+		$result = array_get($this->cachedConfigs, "{$environment}.{$namespace}.{$group}", array());
 
-		$result = $query->get();
+		// Merge global configs
+		$result = array_merge($result, array_get($this->cachedConfigs, "*.{$namespace}.{$group}", array()));
 
 		if ( ! empty($result))
 		{
@@ -237,6 +246,25 @@ class CompositeLoader extends FileLoader {
 	}
 
 	/**
+	 * Cache all configurations.
+	 *
+	 * @return void
+	 */
+	public function cacheConfigs()
+	{
+		$configs = $this->database->table($this->databaseTable)->rememberForever('cartalyst.config')->get();
+
+		$cachedConfigs = array();
+
+		foreach ($configs as $key => $config)
+		{
+			$cachedConfigs["{$config->environment}.{$config->namespace}.{$config->group}"][$config->item] = $config;
+		}
+
+		$this->cachedConfigs = $cachedConfigs;
+	}
+
+	/**
 	 * Returns a query builder object for the given environment, group
 	 * and namespace.
 	 *
@@ -337,6 +365,9 @@ class CompositeLoader extends FileLoader {
 		}
 
 		$this->repository->set($key, null);
+
+		// Purge cached configurations
+		$this->database->getCacheManager()->forget('cartalyst.config');
 	}
 
 	/**

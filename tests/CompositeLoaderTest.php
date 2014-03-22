@@ -80,19 +80,6 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testLoadingFromDatabase()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
-		$query->shouldReceive('whereNested')->with(m::on(function($callback) use ($query)
-		{
-			$query->shouldReceive('where')->with('environment', '=', '*')->once()->andReturn($query);
-
-			$query->shouldReceive('orWhere')->with('environment', '=', 'local')->once()->andReturn($query);
-
-			$callback($query);
-
-			return true;
-		}))->once();
-		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
-		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
-		$query->shouldReceive('orderBy')->with('environment')->once()->andReturn($query);
 
 		$record1 = new stdClass;
 		$record1->environment = 'local';
@@ -118,6 +105,8 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$records = array($record1, $record2, $record3);
 
 		$query->shouldReceive('get')->once()->andReturn($records);
+		$query->shouldReceive('rememberForever')->once()->andReturn($query);
+		$this->loader->cacheConfigs();
 
 		$expected = array(
 			'baz'  => array(
@@ -139,20 +128,6 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testMergingWithFileConfig()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
-		$query->shouldReceive('whereNested')->with(m::on(function($callback) use ($query)
-		{
-			$query->shouldReceive('where')->with('environment', '=', '*')->once()->andReturn($query);
-
-			$query->shouldReceive('orWhere')->with('environment', '=', 'local')->once()->andReturn($query);
-
-			$callback($query);
-
-			return true;
-		}))->once();
-
-		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
-		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
-		$query->shouldReceive('orderBy')->with('environment')->once()->andReturn($query);
 
 		$record1 = new stdClass;
 		$record1->environment = 'local';
@@ -164,6 +139,8 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$records = array($record1);
 
 		$query->shouldReceive('get')->once()->andReturn($records);
+		$query->shouldReceive('rememberForever')->once()->andReturn($query);
+		$this->loader->cacheConfigs();
 
 		// Configure file based loading
 		$this->loader->addNamespace('bar', 'path/to/bar');
@@ -185,19 +162,6 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testDatabaseOverridesFilesystem()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
-		$query->shouldReceive('whereNested')->with(m::on(function($callback) use ($query)
-		{
-			$query->shouldReceive('where')->with('environment', '=', '*')->once()->andReturn($query);
-
-			$query->shouldReceive('orWhere')->with('environment', '=', 'local')->once()->andReturn($query);
-
-			$callback($query);
-
-			return true;
-		}))->once();
-		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
-		$query->shouldReceive('where')->with('namespace', '=', 'bar')->once()->andReturn($query);
-		$query->shouldReceive('orderBy')->with('environment')->once()->andReturn($query);
 
 		$record1 = new stdClass;
 		$record1->environment = 'local';
@@ -216,6 +180,8 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$records = array($record1, $record2);
 
 		$query->shouldReceive('get')->once()->andReturn($records);
+		$query->shouldReceive('rememberForever')->once()->andReturn($query);
+		$this->loader->cacheConfigs();
 
 		// Configure file based loading
 		$this->loader->addNamespace('bar', 'path/to/bar');
@@ -242,6 +208,9 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testPersistingExisting()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
+		$cacheManager->shouldReceive('forget')->once();
+
 		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
@@ -259,6 +228,9 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testPersistingNew()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
+		$cacheManager->shouldReceive('forget')->once();
+
 		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
@@ -282,6 +254,9 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testPersistingStoresAllValuesAsJson()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
+		$cacheManager->shouldReceive('forget')->once();
+
 		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
@@ -305,6 +280,9 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function testPersistingNullRemovesEntry()
 	{
 		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
+		$cacheManager->shouldReceive('forget')->once();
+
 		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
 		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
