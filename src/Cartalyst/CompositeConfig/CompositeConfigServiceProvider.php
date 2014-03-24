@@ -48,7 +48,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 
 		// Set the database property on the composite loader so it will now
 		// merge database configuration with file configuration.
-		if ($this->app['db']->connection()->getSchemaBuilder()->hasTable($table))
+		if ($this->databaseIsReady($table))
 		{
 			$compositeLoader->setDatabase($this->app['db']->connection());
 			$compositeLoader->setDatabaseTable($table);
@@ -69,6 +69,26 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
 
 		$this->app->instance('config.loader.composite', $compositeLoader);
+	}
+
+	/**
+	 * Check for config table.
+	 *
+	 * @param  string  $table
+	 * @return bool
+	 */
+	protected function databaseIsReady($table)
+	{
+		try {
+			if ($this->app['db']->connection()->getSchemaBuilder()->hasTable($table))
+			{
+				return true;
+			}
+		}
+		catch (\PDOException $e)
+		{
+			return false;
+		}
 	}
 
 }
