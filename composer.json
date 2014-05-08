@@ -2,7 +2,7 @@
 	"name": "cartalyst/composite-config",
 	"description": "Composite configuration allowing you to override filesystem configuration in a database.",
 	"keywords": ["platform", "ecommerce", "laravel", "bootstrap"],
-	"license": "Cartalyst-PSL",
+	"license": "proprietary",
 	"authors": [
 		{
 			"name": "Cartalyst LLC",
