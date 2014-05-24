@@ -253,7 +253,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 	public function testPersistingStoresAllValuesAsJson()
 	{
-		$this->database->shouldReceive('table')->with($this->databaseTable)->twice()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
 		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
 		$cacheManager->shouldReceive('forget')->once();
 
@@ -263,13 +263,6 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
 
 		$query->shouldReceive('first')->once()->andReturn(null);
-		$query->shouldReceive('insert')->with(array(
-			'environment' => 'local',
-			'group'       => 'foo',
-			'item'        => 'bar.baz',
-			'value'       => 'false',
-			'namespace'   => 'corge',
-		))->once();
 
 		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
 		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
