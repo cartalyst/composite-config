@@ -40,19 +40,6 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	 *
 	 * @return void
 	 */
-	public static function setUpBeforeClass()
-	{
-		/**
-		 * @todo Remove when https://github.com/laravel/framework/pull/1426 gets merged.
-		 */
-		require_once __DIR__.'/stubs/TestDatabaseConnection.php';
-	}
-
-	/**
-	 * Setup resources and dependencies.
-	 *
-	 * @return void
-	 */
 	public function setUp()
 	{
 		$this->filesystem    = m::mock('Illuminate\Filesystem\Filesystem');
@@ -60,7 +47,7 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 
 		$this->loader        = new CompositeLoader($this->filesystem, $this->defaultPath);
 
-		$this->database = m::mock('TestDatabaseConnection');
+		$this->database = m::mock('Illuminate\Database\Connection');
 		$this->loader->setDatabase($this->database);
 
 		$this->databaseTable = 'config';
@@ -75,6 +62,11 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 	public function tearDown()
 	{
 		m::close();
+	}
+
+	public function testGetDatabase()
+	{
+		$this->assertInstanceOf('Illuminate\Database\Connection', $this->loader->getDatabase());
 	}
 
 	public function testLoadingFromDatabase()
@@ -288,6 +280,113 @@ class CompositeLoaderTest extends PHPUnit_Framework_TestCase {
 		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
 
 		$this->loader->persist('local', 'foo', 'bar.baz', null, 'corge');
+	}
+
+	public function testPersistingWitoutNamespace()
+	{
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
+		$cacheManager->shouldReceive('forget')->once();
+
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
+		$query->shouldReceive('whereNull')->with('namespace')->once()->andReturn($query);
+
+		$query->shouldReceive('first')->once()->andReturn(new stdClass);
+		$query->shouldReceive('delete')->once();
+
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+		$repository->shouldReceive('set')->with('foo.bar.baz', '')->once();
+
+		$this->loader->persist('local', 'foo', 'bar.baz');
+	}
+
+	public function testPersistingWithFallback()
+	{
+		$this->database->shouldReceive('table')->with($this->databaseTable)->once()->andReturn($query = m::mock('Illuminate\Database\Query'));
+		$this->database->shouldReceive('getCacheManager')->once()->andReturn($cacheManager = m::mock('Illuminate\Cache\cacheManager'));
+		$cacheManager->shouldReceive('forget')->once();
+
+		$query->shouldReceive('where')->with('environment', '=', 'local')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('group', '=', 'foo')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('item', '=', 'bar.baz')->once()->andReturn($query);
+		$query->shouldReceive('where')->with('namespace', '=', 'corge')->once()->andReturn($query);
+
+		$query->shouldReceive('first')->once()->andReturn(new stdClass);
+		$query->shouldReceive('delete')->once();
+
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+		$repository->shouldReceive('set')->with('corge::foo.bar.baz', null)->once();
+
+		$this->loader->persist('local', 'foo', 'bar.baz', null, 'corge');
+	}
+
+	public function testPersistingWithoutDatabase()
+	{
+		$this->loader = new CompositeLoader($this->filesystem, $this->defaultPath);
+
+		$this->loader->setRepository($repository = m::mock('Illuminate\Config\Repository'));
+
+		$repository->shouldReceive('parseKey')->once();
+
+		$this->loader->set('local', 'foo', 'bar', 'foobar');
+
+		$actual = $this->loader->load('local', 'foo', 'bar');
+
+		$this->assertEmpty($actual);
+	}
+
+	/**
+	 * @expectedException \RuntimeException
+	 */
+	public function testPersistingWithoutRepository()
+	{
+		$this->loader = new CompositeLoader($this->filesystem, $this->defaultPath);
+
+		$record1 = new stdClass;
+		$record1->environment = 'local';
+		$record1->group       = 'foo';
+		$record1->namespace   = 'bar';
+		$record1->item        = 'baz.bat.qux';
+		$record1->value       = 'corge';
+
+		$record2 = new stdClass;
+		$record2->environment = 'local';
+		$record2->group       = 'foo';
+		$record2->namespace   = 'bar';
+		$record2->item        = 'foo';
+		$record2->value       = 'bar';
+
+		$record3 = new stdClass;
+		$record3->environment = 'local';
+		$record3->group       = 'foo';
+		$record3->namespace   = 'bar';
+		$record3->item        = 'fred';
+		$record3->value       = '{"waldo":true,"fred":"thud"}';
+
+		$records = array($record1, $record2, $record3);
+
+		$this->loader->set('local', 'foo', 'bar', 'foobar	');
+	}
+
+	public function testCascadePackage()
+	{
+		$this->filesystem->shouldReceive('exists')->twice()->andReturn(true);
+
+		$actual = array(
+			'host'     => null,
+			'username' => null,
+		);
+
+		$this->filesystem->shouldReceive('getRequire')->twice()->andReturn($replacement = array(
+			'host'     => 'smtp.example.com',
+			'username' => 'foobar',
+		));
+
+		$cascaded = $this->loader->cascadePackage('*', 'config', 'mail', $actual);
+
+		$this->assertSame($cascaded, $replacement);
 	}
 
 }
