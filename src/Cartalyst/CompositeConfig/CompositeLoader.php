@@ -175,7 +175,7 @@ class CompositeLoader extends FileLoader {
 
 		if ($existing)
 		{
-			if ($value)
+			if (isset($value))
 			{
 				// We'll update an existing record
 				$query->update(array('value' => $this->prepareValue($value)));
@@ -185,7 +185,7 @@ class CompositeLoader extends FileLoader {
 				$query->delete();
 			}
 		}
-		elseif ($value)
+		elseif (isset($value))
 		{
 			// Prepare our data
 			$data = compact('environment', 'group', 'item');
@@ -341,7 +341,7 @@ class CompositeLoader extends FileLoader {
 		// We will always JSON encode the value. This allows us to store "null", "true"
 		// and "false" values in the database (as an example), which may mean completely
 		// different things.
-		return ! empty($value) ? json_encode($value) : null;
+		return json_encode($value);
 	}
 
 	/**
