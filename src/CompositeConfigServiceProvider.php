@@ -18,6 +18,7 @@
  */
 
 use Illuminate\Support\ServiceProvider;
+use PDOException;
 
 class CompositeConfigServiceProvider extends ServiceProvider {
 
@@ -28,7 +29,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('cartalyst/composite-config', 'cartalyst/composite-config', __DIR__.'/..');
+		$this->package('cartalyst/composite-config', 'cartalyst/composite-config', __DIR__);
 
 		$originalLoader = $this->app['config']->getLoader();
 
@@ -39,7 +40,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 			$compositeLoader->addNamespace($namespace, $hint);
 		}
 
-		$table = $this->app['config']['cartalyst/composite-config::table'];
+		$table = $this->app['config']['cartalyst/composite-config::config.table'];
 
 		// Now we will set the config loader instance.
 		unset($this->app['config.loader.composite']);
@@ -78,13 +79,14 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	protected function databaseIsReady($table)
 	{
-		try {
+		try
+		{
 			if ($this->app['db']->connection()->getSchemaBuilder()->hasTable($table))
 			{
 				return true;
 			}
 		}
-		catch (\PDOException $e)
+		catch (PDOException $e)
 		{
 			return false;
 		}
