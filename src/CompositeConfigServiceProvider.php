@@ -28,7 +28,7 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('cartalyst/composite-config', 'cartalyst/composite-config');
+		$this->package('cartalyst/composite-config', 'cartalyst/composite-config', __DIR__.'/..');
 
 		$originalLoader = $this->app['config']->getLoader();
 
