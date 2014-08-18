@@ -1,29 +1,55 @@
 {
 	"name": "cartalyst/composite-config",
 	"description": "Composite configuration allowing you to override filesystem configuration in a database.",
-	"keywords": ["platform", "ecommerce", "laravel", "bootstrap"],
+	"keywords": [
+		"platform",
+		"ecommerce",
+		"laravel",
+		"bootstrap",
+		"config"
+	],
 	"license": "proprietary",
 	"authors": [
 		{
 			"name": "Cartalyst LLC",
-			"email": "ben.corlett@cartalyst.com"
+			"email": "help@cartalyst.com"
+		},
+		{
+			"name": "Ben Corlett",
+			"email": "ben.corlett@cartalyst.com",
+			"role": "Developer"
+		},
+		{
+			"name": "Bruno Gaspar",
+			"email": "bruno.gaspar@cartalyst.com",
+			"role": "Developer"
+		},
+		{
+			"name": "Dan Syme",
+			"email": "dan.syme@cartalyst.com",
+			"role": "Creator & Designer"
+		},
+		{
+			"name": "Suhayb Wardany",
+			"email": "su.wardany@cartalyst.com",
+			"role": "Developer"
 		}
 	],
 	"require": {
 		"php": ">=5.3.0",
-
-		"illuminate/config": "~4",
-		"illuminate/database": "~4"
+		"illuminate/config": ">=4.1,<4.3",
+		"illuminate/database": ">=4.1,<4.3"
 	},
 	"require-dev": {
-		"mockery/mockery": "0.7.2"
+		"mockery/mockery": "~0.9",
+		"phpunit/phpunit": "~4.1"
 	},
 	"autoload": {
 		"classmap": [
 			"src/migrations"
 		],
-		"psr-0": {
-			"Cartalyst\\CompositeConfig": "src"
+		"psr-4": {
+			"Cartalyst\\CompositeConfig\\": "src"
 		}
 	},
 	"extra": {
