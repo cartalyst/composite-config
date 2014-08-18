@@ -1,4 +1,4 @@
-<?php namespace Cartalyst\CompositeConfig;
+<?php namespace Cartalyst\CompositeConfig\Laravel;
 /**
  * Part of the Composite Config package.
  *
