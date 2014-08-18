@@ -17,6 +17,7 @@
  * @link       http://cartalyst.com
  */
 
+use Cartalyst\CompositeConfig\CompositeLoader;
 use Illuminate\Support\ServiceProvider;
 use PDOException;
 
