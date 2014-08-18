@@ -1,6 +1,6 @@
 {
 	"name": "cartalyst/composite-config",
-	"description": "Composite configuration allowing you to override filesystem configuration in a database.",
+	"description": "Override illuminate/config filesystem configuration in a database.",
 	"keywords": [
 		"platform",
 		"ecommerce",
