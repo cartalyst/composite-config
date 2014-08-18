@@ -8,13 +8,34 @@ This is super useful for building user interfaces that facilitate editing config
 
 Part of the Cartalyst Arsenal & licensed [Cartalyst PSL](license.txt). Code well, rock on.
 
-##Package Story
+## Package Story
 
-History and future capabilities.
+Package history and capabilities.
 
+#### 18-Aug-14 - v1.1.0
 
-Versioning
-----------
+- Store configuration on the database.
+- Retrieve configurations from the database.
+- Automatically caches configurations.
+- Automatically flushes cache when a new config is set.
+
+## Requirements
+
+- PHP >=5.4
+
+## Installation
+
+Composite Config is installable with Composer. Read further information on how to install.
+
+[Installation Guide](https://cartalyst.com/manual/composite-config#installation)
+
+## Documentation
+
+Refer to the following guide on how to use the Composite Config package.
+
+[Documentation](https://cartalyst.com/manual/composite-config)
+
+## Versioning
 
 We version under the [Semantic Versioning](http://semver.org/) guidelines as much as possible.
 
@@ -28,12 +49,13 @@ And constructed with the following guidelines:
 * New additions without breaking backward compatibility bumps the minor (and resets the patch)
 * Bug fixes and misc changes bumps the patch
 
-Support
---------
+## Contributing
 
-Have a bug? Please create an issue here on GitHub that conforms with [necolas's guidelines](https://github.com/necolas/issue-guidelines).
+Please read the [Contributing](contributing.md) guidelines.
 
-https://github.com/cartalyst/composite-config/issues
+## Support
+
+Have a bug? Please create an [issue](https://github.com/cartalyst/composite-config/issues) here on GitHub that conforms with [necolas's guidelines](https://github.com/necolas/issue-guidelines).
 
 Follow us on Twitter, [@cartalyst](http://twitter.com/cartalyst).
 
@@ -41,3 +63,5 @@ Join us for a chat on IRC.
 
 Server: irc.freenode.net
 Channel: #cartalyst
+
+Email: help@cartalyst.com
