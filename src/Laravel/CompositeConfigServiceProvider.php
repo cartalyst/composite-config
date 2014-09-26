@@ -10,16 +10,16 @@
  * bundled with this package in the license.txt file.
  *
  * @package    Composite Config
- * @version    1.1.0
+ * @version    1.1.1
  * @author     Cartalyst LLC
  * @license    Cartalyst PSL
  * @copyright  (c) 2011-2014, Cartalyst LLC
  * @link       http://cartalyst.com
  */
 
-use Cartalyst\CompositeConfig\CompositeLoader;
-use Illuminate\Support\ServiceProvider;
 use PDOException;
+use Illuminate\Support\ServiceProvider;
+use Cartalyst\CompositeConfig\CompositeLoader;
 
 class CompositeConfigServiceProvider extends ServiceProvider {
 

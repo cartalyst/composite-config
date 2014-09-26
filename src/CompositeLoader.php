@@ -10,7 +10,7 @@
  * bundled with this package in the license.txt file.
  *
  * @package    Composite Config
- * @version    1.1.0
+ * @version    1.1.1
  * @author     Cartalyst LLC
  * @license    Cartalyst PSL
  * @copyright  (c) 2011-2014, Cartalyst LLC
@@ -19,8 +19,8 @@
 
 use Illuminate\Config\FileLoader;
 use Illuminate\Config\Repository;
-use Illuminate\Database\Connection as DatabaseConnection;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Database\Connection as DatabaseConnection;
 
 class CompositeLoader extends FileLoader {
 
