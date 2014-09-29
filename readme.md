@@ -12,6 +12,10 @@ Part of the Cartalyst Arsenal & licensed [Cartalyst PSL](license.txt). Code well
 
 Package history and capabilities.
 
+#### 29-Sep-14 - v1.1.1
+
+- Removed config table check to save a database query on every request.
+
 #### 18-Aug-14 - v1.1.0
 
 - Store configuration on the database.
