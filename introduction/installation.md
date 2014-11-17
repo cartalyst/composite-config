@@ -1,4 +1,4 @@
-# Installation
+## Installation
 
 The best way to install the Composite Config package is quickly and easily done with [Composer](http://getcomposer.org).
 
@@ -29,7 +29,7 @@ or
 
 Now you are able to require the `vendor/autoload.php` file to PSR-0 autoload the library.
 
-## Example
+### Example
 
 	// Include the composer autoload file
 	require_once 'vendor/autoload.php';
