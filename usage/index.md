@@ -1,12 +1,12 @@
-# Usage
+## Usage
 
-## Retrieving Config
+### Retrieving Config
 
 Usage is identical to [that explained in the Laravel documentation](http://laravel.com/docs/configuration#introduction)
 
 	Config::get($key);
 
-## Saving Config
+### Saving Config
 
 There are two ways of saving configuration items.
 
@@ -31,7 +31,7 @@ Ex. if you're running in the 'local' environment and switch to 'production', you
 Overcoming this is easy, just provide '*' as the third parameter - `Config::getLoader()->set($key, $value, '*');` and it will work for all environments.
 
 
-## Cascading
+### Cascading
 
 Below is the order in which items are cascaded:
 
@@ -42,7 +42,7 @@ Below is the order in which items are cascaded:
 
 Any number of these may be absent, it will be skipped.
 
-## Limitations
+### Limitations
 
 In Laravel 4, configuration is used to resolve database credentials as well as a number of core options. Because of this, any config items requested before the composite config package is loaded will be cached. Typically, this is just the config within `app/config/app.php` and `app/config/database.php` and `app/config/session.php`. There is a way around this if you require to override these config items:
 

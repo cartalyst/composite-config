@@ -1,6 +1,6 @@
-# Integration
+## Integration
 
-## Laravel 4
+### Laravel 4
 
 The Composite Config package has optional support for Laravel 4 and it comes bundled with a
 Service Provider for easier integration.
