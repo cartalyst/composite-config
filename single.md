@@ -1,4 +1,4 @@
-<h1>Introduction</h1>
+<h2>Introduction</h2>
 
 <p>Cartalyst's Composite Config package enhances <code>illuminate/config</code> to allow configuration items to be placed within a database whilst cascading back to the filesystem.</p>
 
@@ -7,20 +7,20 @@
 <p>The package follows the FIG standard PSR-0 to ensure a high level of<br>
 interoperability between shared PHP code and is fully unit-tested.</p>
 
-<h2>Getting started</h2>
+<h3>Getting started</h3>
 
 <p>The package requires at least PHP version 5.3.</p>
 
 <p>Have a <a href="#installation">read through the Installation Guide</a>.</p>
 
-<h3>Quick Example</h3>
+<h4>Quick Example</h4>
 
 <pre><code>// Set config at runtime
 Config::set($key, $value);
 
 // Set persisting config at runtime
 Config::getLoader()-&gt;set($key, $value);
-</code></pre><h1>Installation</h1>
+</code></pre><h2>Installation</h2>
 
 <p>The best way to install the Composite Config package is quickly and easily done with <a href="http://getcomposer.org">Composer</a>.</p>
 
@@ -34,7 +34,7 @@ Config::getLoader()-&gt;set($key, $value);
 <pre><code>"repositories": [
     {
         "type": "composer",
-        "url": "http://packages.cartalyst.com"
+        "url": "https://packages.cartalyst.com"
     }
 ]
 </code></pre>
@@ -57,7 +57,7 @@ Config::getLoader()-&gt;set($key, $value);
 
 <p>Now you are able to require the <code>vendor/autoload.php</code> file to PSR-0 autoload the library.</p>
 
-<h2>Example</h2>
+<h3>Example</h3>
 
 <pre><code>// Include the composer autoload file
 require_once 'vendor/autoload.php';
@@ -81,9 +81,9 @@ $config = new Repository($loader);
 
 // Set persisting config
 $config-&gt;getLoader()-&gt;set($key, $value);
-</code></pre><h1>Integration</h1>
+</code></pre><h2>Integration</h2>
 
-<h2>Laravel 4</h2>
+<h3>Laravel 4</h3>
 
 <p>The Composite Config package has optional support for Laravel 4 and it comes bundled with a<br>
 Service Provider for easier integration.</p>
@@ -113,16 +113,16 @@ application by running the following command:</p>
 </code></pre>
 
 <p>This will publish the config file to <code>app/config/packages/cartalyst/composite-config/config.php</code><br>
-where you can modify the package configuration.</p><h1>Usage</h1>
+where you can modify the package configuration.</p><h2>Usage</h2>
 
-<h2>Retrieving Config</h2>
+<h3>Retrieving Config</h3>
 
 <p>Usage is identical to <a href="http://laravel.com/docs/configuration#introduction">that explained in the Laravel documentation</a></p>
 
 <pre><code>Config::get($key);
 </code></pre>
 
-<h2>Saving Config</h2>
+<h3>Saving Config</h3>
 
 <p>There are two ways of saving configuration items.</p>
 
@@ -152,7 +152,7 @@ Ex. if you're running in the 'local' environment and switch to 'production', you
 Overcoming this is easy, just provide '*' as the third parameter - <code>Config::getLoader()-&gt;set($key, $value, '*');</code> and it will work for all environments.</p>
 </blockquote>
 
-<h2>Cascading</h2>
+<h3>Cascading</h3>
 
 <p>Below is the order in which items are cascaded:</p>
 
@@ -165,7 +165,7 @@ Overcoming this is easy, just provide '*' as the third parameter - <code>Config:
 
 <p>Any number of these may be absent, it will be skipped.</p>
 
-<h2>Limitations</h2>
+<h3>Limitations</h3>
 
 <p>In Laravel 4, configuration is used to resolve database credentials as well as a number of core options. Because of this, any config items requested before the composite config package is loaded will be cached. Typically, this is just the config within <code>app/config/app.php</code> and <code>app/config/database.php</code> and <code>app/config/session.php</code>. There is a way around this if you require to override these config items:</p>
 

@@ -1,4 +1,4 @@
-# Introduction
+## Introduction
 
 Cartalyst's Composite Config package enhances `illuminate/config` to allow configuration items to be placed within a database whilst cascading back to the filesystem.
 
@@ -7,7 +7,7 @@ This is super useful for building user interfaces that facilitate editing config
 The package follows the FIG standard PSR-0 to ensure a high level of
 interoperability between shared PHP code and is fully unit-tested.
 
-## Getting started
+### Getting started
 
 The package requires at least PHP version 5.3.
 
