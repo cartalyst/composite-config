@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Part of the Composite Config package.
  *
@@ -17,17 +18,17 @@
  * @link       http://cartalyst.com
  */
 
-return array(
+return [
 
-	/*
-	|--------------------------------------------------------------------------
-	| Table
-	|--------------------------------------------------------------------------
-	|
-	| Here you can specify the table name used for your composite config.
-	|
-	*/
+    /*
+    |--------------------------------------------------------------------------
+    | Table
+    |--------------------------------------------------------------------------
+    |
+    | Here you can specify the table name used for your composite config.
+    |
+    */
 
-	'table' => 'config',
+    'table' => 'config',
 
-);
+];

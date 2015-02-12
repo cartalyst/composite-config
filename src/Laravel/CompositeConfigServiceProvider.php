@@ -1,4 +1,5 @@
-<?php namespace Cartalyst\CompositeConfig\Laravel;
+<?php
+
 /**
  * Part of the Composite Config package.
  *
@@ -17,90 +18,87 @@
  * @link       http://cartalyst.com
  */
 
+namespace Cartalyst\CompositeConfig\Laravel;
+
 use PDOException;
 use Symfony\Component\Finder\Finder;
 use Illuminate\Support\ServiceProvider;
 use Cartalyst\CompositeConfig\Repository;
 use Illuminate\Foundation\Bootstrap\LoadConfiguration;
 
-class CompositeConfigServiceProvider extends ServiceProvider {
+class CompositeConfigServiceProvider extends ServiceProvider
+{
+    /**
+     * Bootstrap the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $config = $this->app['config'];
 
-	/**
-	 * Bootstrap the application events.
-	 *
-	 * @return void
-	 */
-	public function boot()
-	{
-		$config = $this->app['config'];
+        $table = $this->app['config']['cartalyst.composite-config.table'];
 
-		$table = $this->app['config']['cartalyst.composite-config.table'];
+        try {
+            $config->setDatabase($this->app['db']->connection());
+            $config->setDatabaseTable($table);
+            $config->cacheConfigs();
+            $config->load();
+        } catch (PDOException $e) {
+        }
+    }
 
-		try
-		{
-			$config->setDatabase($this->app['db']->connection());
-			$config->setDatabaseTable($table);
-			$config->cacheConfigs();
-			$config->load();
-		}
-		catch (PDOException $e) {}
-	}
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        $this->prepareResources();
 
-	/**
-	 * Register the service provider.
-	 *
-	 * @return void
-	 */
-	public function register()
-	{
-		$this->prepareResources();
+        $repository = new Repository([], $this->app['cache']);
 
-		$repository = new Repository([], $this->app['cache']);
+        $files = [];
 
-		$files = [];
+        foreach (Finder::create()->files()->name('*.php')->in($this->app->configPath()) as $file) {
+            $files[basename($file->getRealPath(), '.php')] = $file->getRealPath();
+        }
 
-		foreach (Finder::create()->files()->name('*.php')->in($this->app->configPath()) as $file)
-		{
-			$files[basename($file->getRealPath(), '.php')] = $file->getRealPath();
-		}
+        foreach ($files as $key => $path) {
+            $repository->set($key, require $path);
+        }
 
-		foreach ($files as $key => $path)
-		{
-			$repository->set($key, require $path);
-		}
+        $oldItems = $this->app['config']->all();
 
-		$oldItems = $this->app['config']->all();
+        foreach ($oldItems as $key => $value) {
+            $repository->set($key, $value);
+        }
 
-		foreach ($oldItems as $key => $value)
-		{
-			$repository->set($key, $value);
-		}
+        $this->app->instance('config', $repository);
+    }
 
-		$this->app->instance('config', $repository);
-	}
+    /**
+     * Prepare the package resources.
+     *
+     * @return void
+     */
+    protected function prepareResources()
+    {
+        // Publish config
+        $config = realpath(__DIR__.'/../config/config.php');
 
-	/**
-	 * Prepare the package resources.
-	 *
-	 * @return void
-	 */
-	protected function prepareResources()
-	{
-		// Publish config
-		$config = realpath(__DIR__.'/../config/config.php');
+        $this->mergeConfigFrom($config, 'cartalyst.composite-config');
 
-		$this->mergeConfigFrom($config, 'cartalyst.composite-config');
+        $this->publishes([
+            $config => config_path('cartalyst.composite-config.php'),
+        ], 'config');
 
-		$this->publishes([
-			$config => config_path('cartalyst.composite-config.php'),
-		], 'config');
+        // Publish migrations
+        $migrations = realpath(__DIR__.'/../migrations');
 
-		// Publish migrations
-		$migrations = realpath(__DIR__.'/../migrations');
-
-		$this->publishes([
-			$migrations => $this->app->databasePath().'/migrations',
-		], 'migrations');
-	}
-
+        $this->publishes([
+            $migrations => $this->app->databasePath().'/migrations',
+        ], 'migrations');
+    }
 }
