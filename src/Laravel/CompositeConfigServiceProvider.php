@@ -18,8 +18,10 @@
  */
 
 use PDOException;
+use Symfony\Component\Finder\Finder;
 use Illuminate\Support\ServiceProvider;
-use Cartalyst\CompositeConfig\CompositeLoader;
+use Cartalyst\CompositeConfig\Repository;
+use Illuminate\Foundation\Bootstrap\LoadConfiguration;
 
 class CompositeConfigServiceProvider extends ServiceProvider {
 
@@ -30,31 +32,16 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
 	{
-		$this->package('cartalyst/composite-config', 'cartalyst/composite-config', __DIR__.'/..');
+		$config = $this->app['config'];
 
-		$originalLoader = $this->app['config']->getLoader();
+		$table = $this->app['config']['cartalyst.composite-config.table'];
 
-		// We will grab the new loader and syncronize all of the namespaces.
-		$compositeLoader = $this->app['config.loader.composite'];
-		foreach ($originalLoader->getNamespaces() as $namespace => $hint)
-		{
-			$compositeLoader->addNamespace($namespace, $hint);
-		}
-
-		$table = $this->app['config']['cartalyst/composite-config::table'];
-
-		// Now we will set the config loader instance.
-		unset($this->app['config.loader.composite']);
-		$this->app['config']->setLoader($compositeLoader);
-
-		// Set the database property on the composite loader so it will now
-		// merge database configuration with file configuration.
 		try
 		{
-			$compositeLoader->setDatabase($this->app['db']->connection());
-			$compositeLoader->setDatabaseTable($table);
-			$compositeLoader->cacheConfigs();
-			$compositeLoader->setRepository($this->app['config']);
+			$config->setDatabase($this->app['db']->connection());
+			$config->setDatabaseTable($table);
+			$config->cacheConfigs();
+			$config->load();
 		}
 		catch (PDOException $e) {}
 	}
@@ -66,9 +53,54 @@ class CompositeConfigServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$compositeLoader = new CompositeLoader($this->app['files'], $this->app['path'].'/config');
+		$this->prepareResources();
 
-		$this->app->instance('config.loader.composite', $compositeLoader);
+		$repository = new Repository([], $this->app['cache']);
+
+		$files = [];
+
+		foreach (Finder::create()->files()->name('*.php')->in($this->app->configPath()) as $file)
+		{
+			$files[basename($file->getRealPath(), '.php')] = $file->getRealPath();
+		}
+
+		foreach ($files as $key => $path)
+		{
+			$repository->set($key, require $path);
+		}
+
+		$oldItems = $this->app['config']->all();
+
+		foreach ($oldItems as $key => $value)
+		{
+			$repository->set($key, $value);
+		}
+
+		$this->app->instance('config', $repository);
+	}
+
+	/**
+	 * Prepare the package resources.
+	 *
+	 * @return void
+	 */
+	protected function prepareResources()
+	{
+		// Publish config
+		$config = realpath(__DIR__.'/../config/config.php');
+
+		$this->mergeConfigFrom($config, 'cartalyst.composite-config');
+
+		$this->publishes([
+			$config => config_path('cartalyst.composite-config.php'),
+		], 'config');
+
+		// Publish migrations
+		$migrations = realpath(__DIR__.'/../migrations');
+
+		$this->publishes([
+			$migrations => $this->app->databasePath().'/migrations',
+		], 'migrations');
 	}
 
 }

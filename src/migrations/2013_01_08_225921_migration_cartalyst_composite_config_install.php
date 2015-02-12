@@ -30,16 +30,13 @@ class MigrationCartalystCompositeConfigInstall extends Migration {
 	{
 		Schema::create('config', function($table)
 		{
-			$table->string('environment');
-			$table->string('group');
-			$table->string('namespace')->nullable();
 			$table->string('item');
 			$table->text('value')->nullable();
 
 			// We'll need to ensure that MySQL uses the InnoDB engine to
 			// support the indexes, other engines aren't affected.
 			$table->engine = 'InnoDB';
-			$table->unique(array('environment', 'group', 'namespace', 'item'));
+			$table->unique(['item']);
 		});
 	}
 
