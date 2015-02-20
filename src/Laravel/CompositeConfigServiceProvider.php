@@ -42,8 +42,7 @@ class CompositeConfigServiceProvider extends ServiceProvider
         try {
             $config->setDatabase($this->app['db']->connection());
             $config->setDatabaseTable($table);
-            $config->cacheConfigs();
-            $config->load();
+            $config->fetchAndCache();
         } catch (PDOException $e) {
         }
     }

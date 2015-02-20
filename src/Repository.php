@@ -48,13 +48,6 @@ class Repository extends BaseRepository
     protected $cache;
 
     /**
-     * The config repository instance.
-     *
-     * @var Illuminate\Config\Repository
-     */
-    protected $repository;
-
-    /**
      * Constructor.
      *
      * @return void
@@ -98,20 +91,6 @@ class Repository extends BaseRepository
     }
 
     /**
-     * Load the given configuration group.
-     *
-     * @return array
-     */
-    public function load()
-    {
-        $query = $this->database->table($this->databaseTable);
-
-        foreach ($this->cachedConfigs as $key => $value) {
-            parent::set($key, $value);
-        }
-    }
-
-    /**
      * Persist the given configuration to the database.
      *
      * @param  string  $key
@@ -146,9 +125,7 @@ class Repository extends BaseRepository
                 'value' => $this->prepareValue($value),
             ];
 
-            $this
-                ->database->table($this->databaseTable)
-                ->insert($data);
+            $query->insert($data);
         }
 
         $this->removeCache();
@@ -176,21 +153,20 @@ class Repository extends BaseRepository
     }
 
     /**
-     * Set the repository instance on the composite loader.
+     * Returns the database table.
      *
-     * @param  Illuminate\Config\Repository  $repository
      * @return void
      */
-    public function setRepository(BaseRepository $repository)
+    public function getDatabaseTable()
     {
-        $this->repository = $repository;
+        return $this->databaseTable;
     }
 
     /**
-     * Sets the database table used by the
-     * loaded.
+     * Sets the database table.
      *
      * @param  string  $databaseTable
+     * @return void
      */
     public function setDatabaseTable($databaseTable)
     {
@@ -202,7 +178,7 @@ class Repository extends BaseRepository
      *
      * @return void
      */
-    public function cacheConfigs()
+    public function fetchAndCache()
     {
         $configs = $this->cache->rememberForever('cartalyst.config', function () {
             return $this->database->table($this->databaseTable)->get();
@@ -211,7 +187,11 @@ class Repository extends BaseRepository
         $cachedConfigs = [];
 
         foreach ($configs as $key => $config) {
-            $cachedConfigs[$config->item] = $this->parseValue($config->value);
+            $value = $this->parseValue($config->value);
+
+            $cachedConfigs[$config->item] = $value;
+
+            parent::set($config->item, $value);
         }
 
         $this->cachedConfigs = $cachedConfigs;
