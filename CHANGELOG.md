@@ -11,6 +11,10 @@ We do not give estimated times for completion on `Accepted` Proposals.
 
 ---
 
+### v2.0.0 - 2015-02-24
+
+- Refactored for Laravel 5.
+
 ### v1.1.1 - 2014-09-29
 
 `REVISED`
