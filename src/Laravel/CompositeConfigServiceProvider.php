@@ -23,8 +23,7 @@ namespace Cartalyst\CompositeConfig\Laravel;
 use PDOException;
 use Symfony\Component\Finder\Finder;
 use Illuminate\Support\ServiceProvider;
-use Cartalyst\CompositeConfig\Repository;
-use Illuminate\Foundation\Bootstrap\LoadConfiguration;
+use Cartalyst\CompositeConfig\Repository;;
 
 class CompositeConfigServiceProvider extends ServiceProvider
 {
