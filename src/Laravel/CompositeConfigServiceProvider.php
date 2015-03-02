@@ -34,6 +34,8 @@ class CompositeConfigServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->overrideConfigInstance();
+
         $config = $this->app['config'];
 
         $table = $this->app['config']['cartalyst.composite-config.table'];
@@ -54,7 +56,15 @@ class CompositeConfigServiceProvider extends ServiceProvider
     public function register()
     {
         $this->prepareResources();
+    }
 
+    /**
+     * Overrides the config instance.
+     *
+     * @return void
+     */
+    protected function overrideConfigInstance()
+    {
         $repository = new Repository([], $this->app['cache']);
 
         $files = [];
