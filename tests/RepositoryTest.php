@@ -47,7 +47,9 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->cache    = m::mock('Illuminate\Cache\CacheManager');
         $this->database = m::mock('Illuminate\Database\Connection');
 
-        $this->instantiateRepository();
+        $this->repository = new Repository([], $this->cache);
+        $this->repository->setDatabase($this->database);
+        $this->repository->setDatabaseTable('config');
     }
 
     /** @test */
@@ -71,6 +73,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
     /** @test */
     public function it_loads_configs_from_the_database()
     {
+        $this->shouldFetch();
+
         $expected = [
             'baz'  => [
                 'bat' => [
@@ -92,18 +96,15 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
     /** @test */
     public function it_loads_configs_out_of_the_cached_array()
     {
+        $this->shouldFetch();
+
         $this->assertEquals('bar', $this->repository->get('foo'));
     }
 
     /** @test */
     public function it_fallsback_to_the_filesystem_if_not_found_on_database()
     {
-        $this->database->shouldReceive('table')
-            ->once()
-            ->with('config')
-            ->andReturn($this->database);
-
-        $this->instantiateRepository(['qux' => 'foo']);
+        $this->repository = new Repository(['qux' => 'foo']);
 
         $this->assertEquals('foo', $this->repository->get('qux'));
     }
@@ -113,11 +114,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
     {
         $this->database->shouldReceive('table')
             ->with('config')
+            ->once()
             ->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
-
-        $this->cache->shouldReceive('forget')
-            ->with('cartalyst.config')
-            ->once();
 
         $query->shouldReceive('where')
             ->with('item', '=', 'foo')
@@ -131,6 +129,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
             ->with(['item' => 'foo', 'value' => '"bar"'])
             ->once();
 
+        $this->shouldFetch(false);
+
         $this->repository->persist('foo', 'bar');
     }
 
@@ -141,10 +141,6 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
             ->with('config')
             ->once()
             ->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
-
-        $this->cache->shouldReceive('forget')
-            ->with('cartalyst.config')
-            ->once();
 
         $model = m::mock('Illuminate\Support\Collection');
 
@@ -161,6 +157,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
             ->with(['value' => '"bar"'])
             ->once();
 
+        $this->shouldFetch(false);
+
         $this->repository->persist('foo', 'bar');
     }
 
@@ -171,10 +169,6 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
             ->with('config')
             ->once()
             ->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
-
-        $this->cache->shouldReceive('forget')
-            ->with('cartalyst.config')
-            ->once();
 
         $model = m::mock('Illuminate\Support\Collection');
 
@@ -189,6 +183,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
 
         $query->shouldReceive('delete')
             ->once();
+
+        $this->shouldFetch(false);
 
         $this->repository->persist('foo', null);
     }
@@ -207,12 +203,8 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
      * @param  array  $items
      * @return void
      */
-    protected function instantiateRepository($items = [])
+    protected function shouldFetch($trigger = true)
     {
-        $this->repository = new Repository($items, $this->cache);
-        $this->repository->setDatabase($this->database);
-        $this->repository->setDatabaseTable('config');
-
         $record1        = new stdClass;
         $record1->item  = 'baz.bat.qux';
         $record1->value = 'corge';
@@ -227,6 +219,10 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
 
         $records = [$record1, $record2, $record3];
 
+        $this->cache->shouldReceive('forget')
+            ->with('cartalyst.config')
+            ->once();
+
         $this->cache->shouldReceive('rememberForever')
             ->with('cartalyst.config', m::on(function ($callback) {
                 $callback();
@@ -237,12 +233,15 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
             ->andReturn($records);
 
         $this->database->shouldReceive('table')
-            ->once()
             ->with('config')
+            ->once()
             ->andReturn($this->database);
 
         $this->database->shouldReceive('get');
 
-        $this->repository->fetchAndCache();
+        if ($trigger)
+        {
+            $this->repository->fetchAndCache();
+        }
     }
 }

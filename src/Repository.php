@@ -128,7 +128,7 @@ class Repository extends BaseRepository
             $query->insert($data);
         }
 
-        $this->removeCache();
+        $this->fetchAndCache();
     }
 
     /**
@@ -180,6 +180,8 @@ class Repository extends BaseRepository
      */
     public function fetchAndCache()
     {
+        $this->removeCache();
+
         $configs = $this->cache->rememberForever('cartalyst.config', function () {
             return $this->database->table($this->databaseTable)->get();
         });
