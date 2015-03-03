@@ -11,6 +11,13 @@ We do not give estimated times for completion on `Accepted` Proposals.
 
 ---
 
+### v2.0.1 - 2015-03-02
+
+`FIXED`
+
+- Flush cache after persisting configs so that they're available on the same request.
+- Service Provider attempting to access the cache manager before being initialized.
+
 ### v2.0.0 - 2015-02-24
 
 - Refactored for Laravel 5.
