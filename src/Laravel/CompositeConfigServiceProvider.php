@@ -28,27 +28,6 @@ use Cartalyst\CompositeConfig\Repository;;
 class CompositeConfigServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $this->overrideConfigInstance();
-
-        $config = $this->app['config'];
-
-        $table = $this->app['config']['cartalyst.composite-config.table'];
-
-        try {
-            $config->setDatabase($this->app['db']->connection());
-            $config->setDatabaseTable($table);
-            $config->fetchAndCache();
-        } catch (PDOException $e) {
-        }
-    }
-
-    /**
      * Register the service provider.
      *
      * @return void
@@ -56,6 +35,10 @@ class CompositeConfigServiceProvider extends ServiceProvider
     public function register()
     {
         $this->prepareResources();
+
+        $this->overrideConfigInstance();
+
+        $this->setUpConfig();
     }
 
     /**
@@ -66,16 +49,6 @@ class CompositeConfigServiceProvider extends ServiceProvider
     protected function overrideConfigInstance()
     {
         $repository = new Repository([], $this->app['cache']);
-
-        $files = [];
-
-        foreach (Finder::create()->files()->name('*.php')->in($this->app->configPath()) as $file) {
-            $files[basename($file->getRealPath(), '.php')] = $file->getRealPath();
-        }
-
-        foreach ($files as $key => $path) {
-            $repository->set($key, require $path);
-        }
 
         $oldItems = $this->app['config']->all();
 
@@ -108,5 +81,24 @@ class CompositeConfigServiceProvider extends ServiceProvider
         $this->publishes([
             $migrations => $this->app->databasePath().'/migrations',
         ], 'migrations');
+    }
+
+    /**
+     * Sets up, fetches and caches configurations.
+     *
+     * @return void
+     */
+    protected function setUpConfig()
+    {
+        $config = $this->app['config'];
+
+        $table = $this->app['config']['cartalyst.composite-config.table'];
+
+        try {
+            $config->setDatabase($this->app['db']->connection());
+            $config->setDatabaseTable($table);
+            $config->fetchAndCache();
+        } catch (PDOException $e) {
+        }
     }
 }
