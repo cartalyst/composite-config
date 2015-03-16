@@ -11,6 +11,12 @@ We do not give estimated times for completion on `Accepted` Proposals.
 
 ---
 
+### v2.0.2 - 2015-03-16
+
+`FIXED`
+
+- Fetch and cache configurations on `register` so that they are available earlier in the lifecycle.
+
 ### v2.0.1 - 2015-03-02
 
 `FIXED`
