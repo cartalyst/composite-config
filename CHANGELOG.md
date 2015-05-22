@@ -11,6 +11,12 @@ We do not give estimated times for completion on `Accepted` Proposals.
 
 ---
 
+### v2.0.3 - 2015-05-22
+
+`FIXED`
+
+- A class `cache` does not exist exception.
+
 ### v2.0.2 - 2015-03-16
 
 `FIXED`
