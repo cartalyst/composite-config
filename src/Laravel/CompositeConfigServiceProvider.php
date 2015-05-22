@@ -48,6 +48,8 @@ class CompositeConfigServiceProvider extends ServiceProvider
      */
     protected function overrideConfigInstance()
     {
+        $this->app->register('Illuminate\Cache\CacheServiceProvider');
+
         $repository = new Repository([], $this->app['cache']);
 
         $oldItems = $this->app['config']->all();
