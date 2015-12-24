@@ -1,6 +1,6 @@
 # Composite Config
 
-[![Build Status](http://ci.cartalyst.com/build-status/svg/10)](http://ci.cartalyst.com/build-status/view/10)
+[![Build Status](https://travis-ci.com/cartalyst/composite-config.svg?token=LAut3LMbmBFi3T9j45FH&branch=2.0)](https://travis-ci.com/cartalyst/composite-config)
 
 Our composite config package enhances `illuminate/config` to allow configuration items to be placed within a database whilst cascading back to the filesystem.
 
@@ -28,7 +28,7 @@ Important versions listed below. Refer to the [Changelog](CHANGELOG.md) for a fu
 
 The following support channels can be used for contact.
 
-- [Twitter](https://cartalyst.com/@twitter)
+- [Twitter](https://twitter.com/@cartalyst)
 - [Email](mailto:help@cartalyst.com)
 
 Bug reports, feature requests, and pull requests can be submitted by following our [Contribution Guide](CONTRIBUTING.md).
