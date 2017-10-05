@@ -77,6 +77,19 @@ class Repository extends BaseRepository
         return $this->retrieve($key) ?: parent::get($key, $default);
     }
 
+     /**
+     * Set a given configuration value.
+     *
+     * @param  array|string  $key
+     * @param  mixed   $value
+     * @return void
+     */
+    public function set($key, $value = null)
+    {
+        $this->cachedConfigs[$key] = $value;
+        parent::set($key, $value);
+    }
+
     /**
      * Retrieves a value from the database.
      *
