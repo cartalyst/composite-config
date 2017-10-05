@@ -230,13 +230,19 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
     {
         $this->shouldFetch();
 
-        $configValuePreRuntimeSet = $this->repository->get('baz.bat.qux');
+        $configValuePreRuntimeSetLevelThree = $this->repository->get('baz.bat.qux');
+        $configValuePreRuntimeSetLevelTwo = $this->repository->get('baz.bat');
+        $configValuePreRuntimeSetLevelOne = $this->repository->get('baz');
 
         $this->repository->set('baz.bat.qux', 'not corge');
 
-        $configValuePostRuntimeSet = $this->repository->get('baz.bat.qux');
+        $configValuePostRuntimeSetLevelThree = $this->repository->get('baz.bat.qux');
+        $configValuePostRuntimeSetLevelTwo = $this->repository->get('baz.bat');
+        $configValuePostRuntimeSetLevelOne = $this->repository->get('baz');
 
-        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+        $this->assertNotEquals($configValuePreRuntimeSetLevelThree,$configValuePostRuntimeSetLevelThree);
+        $this->assertNotEquals($configValuePreRuntimeSetLevelTwo,$configValuePostRuntimeSetLevelTwo);
+        $this->assertNotEquals($configValuePreRuntimeSetLevelOne,$configValuePostRuntimeSetLevelOne);
     }
 
 
