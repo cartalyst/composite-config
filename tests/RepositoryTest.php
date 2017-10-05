@@ -197,6 +197,49 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->assertNull($this->repository->persist('foo', 'bar'));
     }
 
+    /** @test */
+    public function retrieve_level_one_config_value_set_at_runtime()
+    {
+        $this->shouldFetch();
+
+        $configValuePreRuntimeSet = $this->repository->get('foo');
+
+        $this->repository->set('foo', 'not bar');
+
+        $configValuePostRuntimeSet = $this->repository->get('foo');
+        
+        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+    }
+
+    /** @test */
+    public function retrieve_level_two_config_value_set_at_runtime()
+    {
+        $this->shouldFetch();
+
+        $configValuePreRuntimeSet = $this->repository->get('fred.fred');
+
+        $this->repository->set('fred.fred', 'not thud');
+
+        $configValuePostRuntimeSet = $this->repository->get('fred.fred');
+
+        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+    }
+
+        /** @test */
+    public function retrieve_level_three_config_value_set_at_runtime()
+    {
+        $this->shouldFetch();
+
+        $configValuePreRuntimeSet = $this->repository->get('baz.bat.qux');
+
+        $this->repository->set('baz.bat.qux', 'not corge');
+
+        $configValuePostRuntimeSet = $this->repository->get('baz.bat.qux');
+
+        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+    }
+
+
     /**
      * Instantiates a config repository.
      *
