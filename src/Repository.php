@@ -20,6 +20,7 @@
 
 namespace Cartalyst\CompositeConfig;
 
+use Illuminate\Support\Arr;
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository as BaseRepository;
 use Illuminate\Database\Connection as DatabaseConnection;
@@ -86,9 +87,15 @@ class Repository extends BaseRepository
      */
     public function set($key, $value = null)
     {
-        $this->cachedConfigs[$key] = $value;
-        parent::set($key, $value);
+        $keys = is_array($key) ? $key : [$key => $value];
+        
+        foreach ($keys as $key => $value) {
+            $this->cachedConfigs[$key] = $value;
+            parent::set($key, $value);
+        }
     }
+
+        
 
     /**
      * Retrieves a value from the database.
