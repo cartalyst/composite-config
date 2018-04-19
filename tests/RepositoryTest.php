@@ -207,7 +207,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->repository->set('foo', 'not bar');
 
         $configValuePostRuntimeSet = $this->repository->get('foo');
-        
+
         $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
     }
 
@@ -225,7 +225,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
     }
 
-        /** @test */
+    /** @test */
     public function retrieve_level_three_config_value_set_at_runtime()
     {
         $this->shouldFetch();
@@ -245,7 +245,6 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->assertNotEquals($configValuePreRuntimeSetLevelOne,$configValuePostRuntimeSetLevelOne);
     }
 
-
     /** @test */
     public function retrieve_level_one_config_value_from_array_set_at_runtime()
     {
@@ -258,9 +257,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
 
         $configValuePostRuntimeSet = $this->repository->get('foo');
         $configPostRuntimeSet = $this->repository->all();
-        // var_dump($configPreRuntimeSet);
-        // dd($configPostRuntimeSet);
-        
+
         $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
         $this->assertNotEquals($configPreRuntimeSet,$configPostRuntimeSet);
     }
@@ -279,7 +276,7 @@ class RepositoryTest extends PHPUnit_Framework_TestCase
         $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
     }
 
-        /** @test */
+    /** @test */
     public function retrieve_level_three_config_value_from_array_set_at_runtime()
     {
         $this->shouldFetch();

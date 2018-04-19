@@ -78,7 +78,7 @@ class Repository extends BaseRepository
         return $this->retrieve($key) ?: parent::get($key, $default);
     }
 
-     /**
+    /**
      * Set a given configuration value.
      *
      * @param  array|string  $key
@@ -88,14 +88,12 @@ class Repository extends BaseRepository
     public function set($key, $value = null)
     {
         $keys = is_array($key) ? $key : [$key => $value];
-        
+
         foreach ($keys as $key => $value) {
             $this->cachedConfigs[$key] = $value;
             parent::set($key, $value);
         }
     }
-
-        
 
     /**
      * Retrieves a value from the database.
