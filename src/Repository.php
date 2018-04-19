@@ -91,7 +91,8 @@ class Repository extends BaseRepository
 
         foreach ($keys as $key => $value) {
             $this->cachedConfigs[$key] = $value;
-            parent::set($key, $value);
+
+            Arr::set($this->items, $key, $value);
         }
     }
 
