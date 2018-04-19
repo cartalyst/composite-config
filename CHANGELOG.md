@@ -11,6 +11,12 @@ We do not give estimated times for completion on `Accepted` Proposals.
 
 ---
 
+### v2.0.5 - 2018-04-19
+
+`FIXED`
+
+- Issue where calling Config::set at runtime was not overriding values that were stored on the database.
+
 ### v2.0.4 - 2015-12-24
 
 `UPDATED`
