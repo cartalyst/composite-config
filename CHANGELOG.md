@@ -1,15 +1,4 @@
-# Composite Config Change Log
-
-This project follows [Semantic Versioning](CONTRIBUTING.md).
-
-## Proposals
-
-We do not give estimated times for completion on `Accepted` Proposals.
-
-- [Accepted](https://github.com/cartalyst/composite-config/labels/Accepted)
-- [Rejected](https://github.com/cartalyst/composite-config/labels/Rejected)
-
----
+# Changelog
 
 ### v2.0.5 - 2018-04-19
 
