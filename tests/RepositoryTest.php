@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * Part of the Composite Config package.
  *
  * NOTICE OF LICENSE
@@ -20,327 +20,174 @@
 
 namespace Cartalyst\CompositeConfig\Tests;
 
-use stdClass;
-use Mockery as m;
-use PHPUnit_Framework_TestCase;
-use Cartalyst\CompositeConfig\Repository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 
-class RepositoryTest extends PHPUnit_Framework_TestCase
+class RepositoryTest extends FunctionalTestCase
 {
-    /**
-     * Close mockery.
-     *
-     * @return void
-     */
-    public function tearDown()
+    /** @test */
+    public function it_can_set_and_get_the_database_connection()
     {
-        m::close();
-    }
+        $connection = DB::connection();
 
-    /**
-     * Setup resources and dependencies.
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        $this->cache    = m::mock('Illuminate\Cache\CacheManager');
-        $this->database = m::mock('Illuminate\Database\Connection');
+        Config::setDatabase($connection);
 
-        $this->repository = new Repository([], $this->cache);
-        $this->repository->setDatabase($this->database);
-        $this->repository->setDatabaseTable('config');
+        $this->assertSame($connection, Config::getDatabase());
     }
 
     /** @test */
-    public function it_can_set_and_retrieve_the_database_connection()
+    public function it_can_set_and_get_the_database_table()
     {
-        $connection = m::mock('Illuminate\Database\Connection');
+        Config::setDatabaseTable('config');
 
-        $this->repository->setDatabase($connection);
-
-        $this->assertSame($connection, $this->repository->getDatabase());
+        $this->assertSame('config', Config::getDatabaseTable());
     }
 
-    /** @test */
-    public function it_can_set_and_retrieve_the_database_table()
-    {
-        $this->repository->setDatabaseTable('config');
+    // /** @test */
+    // public function it_loads_configs_from_the_database()
+    // {
+    //     $this->shouldFetch();
 
-        $this->assertSame('config', $this->repository->getDatabaseTable());
-    }
+    //     $expected = [
+    //         'baz' => [
+    //             'bat' => [
+    //                 'qux' => 'corge',
+    //             ],
+    //         ],
+    //         'foo'  => 'bar',
+    //         'fred' => [
+    //             'waldo' => true,
+    //             'fred'  => 'thud',
+    //         ],
+    //     ];
 
-    /** @test */
-    public function it_loads_configs_from_the_database()
-    {
-        $this->shouldFetch();
+    //     $actual = $this->repository->all();
 
-        $expected = [
-            'baz'  => [
-                'bat' => [
-                    'qux' => 'corge',
-                ],
-            ],
-            'foo'  => 'bar',
-            'fred' => [
-                'waldo' => true,
-                'fred'  => 'thud',
-            ],
-        ];
-
-        $actual = $this->repository->all();
-
-        $this->assertEquals($expected, $actual);
-    }
-
-    /** @test */
-    public function it_loads_configs_out_of_the_cached_array()
-    {
-        $this->shouldFetch();
-
-        $this->assertEquals('bar', $this->repository->get('foo'));
-    }
+    //     $this->assertSame($expected, $actual);
+    // }
 
     /** @test */
     public function it_fallsback_to_the_filesystem_if_not_found_on_database()
     {
-        $this->repository = new Repository(['qux' => 'foo']);
-
-        $this->assertEquals('foo', $this->repository->get('qux'));
+        $this->assertSame('foo', Config::get('qux', 'foo'));
     }
 
     /** @test */
     public function it_can_persist_configs_to_the_database()
     {
-        $this->database->shouldReceive('table')
-            ->with('config')
-            ->once()
-            ->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
+        Config::persist('foo', 'bar');
 
-        $query->shouldReceive('where')
-            ->with('item', '=', 'foo')
-            ->once()
-            ->andReturn($query);
-
-        $query->shouldReceive('first')
-            ->once();
-
-        $query->shouldReceive('insert')
-            ->with(['item' => 'foo', 'value' => '"bar"'])
-            ->once();
-
-        $this->shouldFetch(false);
-
-        $this->repository->persist('foo', 'bar');
+        $this->assertSame('bar', Config::get('foo'));
     }
 
     /** @test */
     public function it_will_update_existing_records_on_persist()
     {
-        $this->database->shouldReceive('table')
-            ->with('config')
-            ->once()
-            ->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
+        Config::persist('foo', 'Value 1');
 
-        $model = m::mock('Illuminate\Support\Collection');
+        $this->assertSame('Value 1', Config::get('foo'));
 
-        $query->shouldReceive('where')
-            ->with('item', '=', 'foo')
-            ->once()
-            ->andReturn($query);
+        Config::persist('foo', 'Value 2');
 
-        $query->shouldReceive('first')
-            ->once()
-            ->andReturn($model);
-
-        $query->shouldReceive('update')
-            ->with(['value' => '"bar"'])
-            ->once();
-
-        $this->shouldFetch(false);
-
-        $this->repository->persist('foo', 'bar');
+        $this->assertSame('Value 2', Config::get('foo'));
     }
 
     /** @test */
     public function it_will_delete_existing_records_on_persist_if_value_is_unset()
     {
-        $this->database->shouldReceive('table')
-            ->with('config')
-            ->once()
-            ->andReturn($query = m::mock('Illuminate\Database\Query\Builder'));
+        Config::persist('something', 'Value');
 
-        $model = m::mock('Illuminate\Support\Collection');
+        $this->assertSame('Value', Config::get('something'));
 
-        $query->shouldReceive('where')
-            ->with('item', '=', 'foo')
-            ->once()
-            ->andReturn($query);
+        Config::persist('something', null);
 
-        $query->shouldReceive('first')
-            ->once()
-            ->andReturn($model);
-
-        $query->shouldReceive('delete')
-            ->once();
-
-        $this->shouldFetch(false);
-
-        $this->repository->persist('foo', null);
-    }
-
-    /** @test */
-    public function it_will_return_null_if_database_connection_is_unset()
-    {
-        $this->repository = new Repository();
-
-        $this->assertNull($this->repository->persist('foo', 'bar'));
+        $this->assertNull(Config::get('something'));
     }
 
     /** @test */
     public function retrieve_level_one_config_value_set_at_runtime()
     {
-        $this->shouldFetch();
+        $configValuePreRuntimeSet = Config::get('foo');
 
-        $configValuePreRuntimeSet = $this->repository->get('foo');
+        Config::set('foo', 'not bar');
 
-        $this->repository->set('foo', 'not bar');
+        $configValuePostRuntimeSet = Config::get('foo');
 
-        $configValuePostRuntimeSet = $this->repository->get('foo');
-
-        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+        $this->assertNotSame($configValuePreRuntimeSet, $configValuePostRuntimeSet);
     }
 
     /** @test */
     public function retrieve_level_two_config_value_set_at_runtime()
     {
-        $this->shouldFetch();
+        $configValuePreRuntimeSet = Config::get('fred.fred');
 
-        $configValuePreRuntimeSet = $this->repository->get('fred.fred');
+        Config::set('fred.fred', 'not thud');
 
-        $this->repository->set('fred.fred', 'not thud');
+        $configValuePostRuntimeSet = Config::get('fred.fred');
 
-        $configValuePostRuntimeSet = $this->repository->get('fred.fred');
-
-        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+        $this->assertNotSame($configValuePreRuntimeSet, $configValuePostRuntimeSet);
     }
 
     /** @test */
     public function retrieve_level_three_config_value_set_at_runtime()
     {
-        $this->shouldFetch();
+        $configValuePreRuntimeSetLevelThree = Config::get('baz.bat.qux');
+        $configValuePreRuntimeSetLevelTwo   = Config::get('baz.bat');
+        $configValuePreRuntimeSetLevelOne   = Config::get('baz');
 
-        $configValuePreRuntimeSetLevelThree = $this->repository->get('baz.bat.qux');
-        $configValuePreRuntimeSetLevelTwo = $this->repository->get('baz.bat');
-        $configValuePreRuntimeSetLevelOne = $this->repository->get('baz');
+        Config::set('baz.bat.qux', 'not corge');
 
-        $this->repository->set('baz.bat.qux', 'not corge');
+        $configValuePostRuntimeSetLevelThree = Config::get('baz.bat.qux');
+        $configValuePostRuntimeSetLevelTwo   = Config::get('baz.bat');
+        $configValuePostRuntimeSetLevelOne   = Config::get('baz');
 
-        $configValuePostRuntimeSetLevelThree = $this->repository->get('baz.bat.qux');
-        $configValuePostRuntimeSetLevelTwo = $this->repository->get('baz.bat');
-        $configValuePostRuntimeSetLevelOne = $this->repository->get('baz');
-
-        $this->assertNotEquals($configValuePreRuntimeSetLevelThree,$configValuePostRuntimeSetLevelThree);
-        $this->assertNotEquals($configValuePreRuntimeSetLevelTwo,$configValuePostRuntimeSetLevelTwo);
-        $this->assertNotEquals($configValuePreRuntimeSetLevelOne,$configValuePostRuntimeSetLevelOne);
+        $this->assertNotSame($configValuePreRuntimeSetLevelThree, $configValuePostRuntimeSetLevelThree);
+        $this->assertNotSame($configValuePreRuntimeSetLevelTwo, $configValuePostRuntimeSetLevelTwo);
+        $this->assertNotSame($configValuePreRuntimeSetLevelOne, $configValuePostRuntimeSetLevelOne);
     }
 
     /** @test */
     public function retrieve_level_one_config_value_from_array_set_at_runtime()
     {
-        $this->shouldFetch();
+        $configValuePreRuntimeSet = Config::get('foo');
+        $configPreRuntimeSet      = Config::all();
 
-        $configValuePreRuntimeSet = $this->repository->get('foo');
-        $configPreRuntimeSet = $this->repository->all();
+        Config::set(['foo' => 'not bar']);
 
-        $this->repository->set(['foo' => 'not bar']);
+        $configValuePostRuntimeSet = Config::get('foo');
+        $configPostRuntimeSet      = Config::all();
 
-        $configValuePostRuntimeSet = $this->repository->get('foo');
-        $configPostRuntimeSet = $this->repository->all();
-
-        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
-        $this->assertNotEquals($configPreRuntimeSet,$configPostRuntimeSet);
+        $this->assertNotSame($configValuePreRuntimeSet, $configValuePostRuntimeSet);
+        $this->assertNotSame($configPreRuntimeSet, $configPostRuntimeSet);
     }
 
     /** @test */
     public function retrieve_level_two_config_value_from_array_set_at_runtime()
     {
-        $this->shouldFetch();
+        $configValuePreRuntimeSet = Config::get('fred.fred');
 
-        $configValuePreRuntimeSet = $this->repository->get('fred.fred');
+        Config::set(['fred.fred' => 'not thud']);
 
-        $this->repository->set(['fred.fred' => 'not thud']);
+        $configValuePostRuntimeSet = Config::get('fred.fred');
 
-        $configValuePostRuntimeSet = $this->repository->get('fred.fred');
-
-        $this->assertNotEquals($configValuePreRuntimeSet,$configValuePostRuntimeSet);
+        $this->assertNotSame($configValuePreRuntimeSet, $configValuePostRuntimeSet);
     }
 
     /** @test */
     public function retrieve_level_three_config_value_from_array_set_at_runtime()
     {
-        $this->shouldFetch();
+        $configValuePreRuntimeSetLevelThree = Config::get('baz.bat.qux');
+        $configValuePreRuntimeSetLevelTwo   = Config::get('baz.bat');
+        $configValuePreRuntimeSetLevelOne   = Config::get('baz');
 
-        $configValuePreRuntimeSetLevelThree = $this->repository->get('baz.bat.qux');
-        $configValuePreRuntimeSetLevelTwo = $this->repository->get('baz.bat');
-        $configValuePreRuntimeSetLevelOne = $this->repository->get('baz');
+        Config::set(['baz.bat.qux' => 'not corge']);
 
-        $this->repository->set(['baz.bat.qux' => 'not corge']);
+        $configValuePostRuntimeSetLevelThree = Config::get('baz.bat.qux');
+        $configValuePostRuntimeSetLevelTwo   = Config::get('baz.bat');
+        $configValuePostRuntimeSetLevelOne   = Config::get('baz');
 
-        $configValuePostRuntimeSetLevelThree = $this->repository->get('baz.bat.qux');
-        $configValuePostRuntimeSetLevelTwo = $this->repository->get('baz.bat');
-        $configValuePostRuntimeSetLevelOne = $this->repository->get('baz');
-
-        $this->assertNotEquals($configValuePreRuntimeSetLevelThree,$configValuePostRuntimeSetLevelThree);
-        $this->assertNotEquals($configValuePreRuntimeSetLevelTwo,$configValuePostRuntimeSetLevelTwo);
-        $this->assertNotEquals($configValuePreRuntimeSetLevelOne,$configValuePostRuntimeSetLevelOne);
-    }
-
-    /**
-     * Instantiates a config repository.
-     *
-     * @param  array  $items
-     * @return void
-     */
-    protected function shouldFetch($trigger = true)
-    {
-        $record1        = new stdClass;
-        $record1->item  = 'baz.bat.qux';
-        $record1->value = 'corge';
-
-        $record2        = new stdClass;
-        $record2->item  = 'foo';
-        $record2->value = 'bar';
-
-        $record3        = new stdClass;
-        $record3->item  = 'fred';
-        $record3->value = '{"waldo":true,"fred":"thud"}';
-
-        $records = [$record1, $record2, $record3];
-
-        $this->cache->shouldReceive('forget')
-            ->with('cartalyst.config')
-            ->once();
-
-        $this->cache->shouldReceive('rememberForever')
-            ->with('cartalyst.config', m::on(function ($callback) {
-                $callback();
-
-                return true;
-            }))
-            ->once()
-            ->andReturn($records);
-
-        $this->database->shouldReceive('table')
-            ->with('config')
-            ->once()
-            ->andReturn($this->database);
-
-        $this->database->shouldReceive('get');
-
-        if ($trigger)
-        {
-            $this->repository->fetchAndCache();
-        }
+        $this->assertNotSame($configValuePreRuntimeSetLevelThree, $configValuePostRuntimeSetLevelThree);
+        $this->assertNotSame($configValuePreRuntimeSetLevelTwo, $configValuePostRuntimeSetLevelTwo);
+        $this->assertNotSame($configValuePreRuntimeSetLevelOne, $configValuePostRuntimeSetLevelOne);
     }
 }
