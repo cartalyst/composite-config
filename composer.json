@@ -12,7 +12,8 @@
     "authors": [
         {
             "name": "Cartalyst LLC",
-            "email": "help@cartalyst.com"
+            "email": "help@cartalyst.com",
+            "homepage": "https://cartalyst.com"
         }
     ],
     "require": {
@@ -29,11 +30,22 @@
             "Cartalyst\\CompositeConfig\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Cartalyst\\CompositeConfig\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
     "extra": {
         "component": "package",
         "branch-alias": {
             "dev-master": "2.0.x-dev"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
