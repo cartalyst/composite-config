@@ -16,4 +16,4 @@ Have a [read through the Installation Guide](#installation).
 	Config::set($key, $value);
 
 	// Set persisting config at runtime
-	Config::getLoader()->set($key, $value);
+	Config::persist($key, $value);
