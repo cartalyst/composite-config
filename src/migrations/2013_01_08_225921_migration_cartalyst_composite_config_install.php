@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * Part of the Composite Config package.
  *
  * NOTICE OF LICENSE

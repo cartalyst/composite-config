@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * Part of the Composite Config package.
  *
  * NOTICE OF LICENSE
@@ -42,7 +42,7 @@ class Repository extends BaseRepository
     protected $databaseTable;
 
     /**
-     * Cache instance.
+     * The Illuminate Cache Manager instance.
      *
      * @var \Illuminate\Cache\CacheManager
      */
@@ -50,6 +50,9 @@ class Repository extends BaseRepository
 
     /**
      * Constructor.
+     *
+     * @param array                          $items
+     * @param \Illuminate\Cache\CacheManager $cache
      *
      * @return void
      */
@@ -70,8 +73,10 @@ class Repository extends BaseRepository
     /**
      * Returns the config value.
      *
-     * @param  string  $key
-     * @return string
+     * @param string     $key
+     * @param mixed|null $default
+     *
+     * @return mixed|null
      */
     public function get($key, $default = null)
     {
@@ -81,11 +86,12 @@ class Repository extends BaseRepository
     /**
      * Set a given configuration value.
      *
-     * @param  array|string  $key
-     * @param  mixed   $value
+     * @param array|string $key
+     * @param mixed|null   $value
+     *
      * @return void
      */
-    public function set($key, $value = null)
+    public function set($key, $value = null): void
     {
         $keys = is_array($key) ? $key : [$key => $value];
 
@@ -99,10 +105,11 @@ class Repository extends BaseRepository
     /**
      * Retrieves a value from the database.
      *
-     * @param  string  $key
-     * @return string|null
+     * @param string $key
+     *
+     * @return mixed|null
      */
-    protected function retrieve($key)
+    protected function retrieve(string $key)
     {
         if (isset($this->cachedConfigs[$key])) {
             return $this->cachedConfigs[$key];
@@ -112,42 +119,41 @@ class Repository extends BaseRepository
     /**
      * Persist the given configuration to the database.
      *
-     * @param  string  $key
-     * @param  mixed   $value
+     * @param string     $key
+     * @param mixed|null $value
+     *
      * @return void
      */
-    public function persist($key, $value = null)
+    public function persist(string $key, $value = null): void
     {
         // If there is no databse, we'll not persist anything which will make
         // the configuration act as if this package was not installed.
-        if (! isset($this->database)) {
-            return;
-        }
+        if (isset($this->database)) {
+            $query = $this->database->table($this->databaseTable)->where('item', '=', $key);
 
-        $query = $this->database->table($this->databaseTable)
-            ->where('item', '=', $key);
+            // Firstly, we'll see if the configuration exists
+            $existing = $query->first();
 
-        // Firstly, we'll see if the configuration exists
-        $existing = $query->first();
+            if ($existing) {
+                if (isset($value)) {
+                    // We'll update an existing record
+                    $query->update(['value' => $this->prepareValue($value)]);
+                } else {
+                    $query->delete();
 
-        if ($existing) {
-            if (isset($value)) {
-                // We'll update an existing record
-                $query->update(['value' => $this->prepareValue($value)]);
-            } else {
-                $query->delete();
+                    $this->set($key, null);
+                }
             }
-        } elseif (isset($value)) {
-            // Prepare our data
-            $data = [
-                'item'  => $key,
-                'value' => $this->prepareValue($value),
-            ];
 
-            $query->insert($data);
+            if (! $existing && isset($value)) {
+                $query->insert([
+                    'item'  => $key,
+                    'value' => $this->prepareValue($value),
+                ]);
+            }
+
+            $this->fetchAndCache();
         }
-
-        $this->fetchAndCache();
     }
 
     /**
@@ -155,7 +161,7 @@ class Repository extends BaseRepository
      *
      * @return Illuminate\Database\Connection
      */
-    public function getDatabase()
+    public function getDatabase(): DatabaseConnection
     {
         return $this->database;
     }
@@ -163,20 +169,23 @@ class Repository extends BaseRepository
     /**
      * Sets the database connection.
      *
-     * @param  Illuminate\Database\Connection  $database
-     * @return void
+     * @param Illuminate\Database\Connection $database
+     *
+     * @return $this
      */
-    public function setDatabase(DatabaseConnection $database)
+    public function setDatabase(DatabaseConnection $database): self
     {
         $this->database = $database;
+
+        return $this;
     }
 
     /**
      * Returns the database table.
      *
-     * @return void
+     * @return string
      */
-    public function getDatabaseTable()
+    public function getDatabaseTable(): string
     {
         return $this->databaseTable;
     }
@@ -184,12 +193,15 @@ class Repository extends BaseRepository
     /**
      * Sets the database table.
      *
-     * @param  string  $databaseTable
-     * @return void
+     * @param string $databaseTable
+     *
+     * @return $this
      */
-    public function setDatabaseTable($databaseTable)
+    public function setDatabaseTable(string $databaseTable): self
     {
         $this->databaseTable = $databaseTable;
+
+        return $this;
     }
 
     /**
@@ -197,7 +209,7 @@ class Repository extends BaseRepository
      *
      * @return void
      */
-    public function fetchAndCache()
+    public function fetchAndCache(): void
     {
         $this->removeCache();
 
@@ -222,7 +234,8 @@ class Repository extends BaseRepository
      * Parses a value from the database and attempts to return it's
      * JSON decoded value.
      *
-     * @param  string  $json
+     * @param mixed $value
+     *
      * @return mixed
      */
     protected function parseValue($value)
@@ -239,7 +252,8 @@ class Repository extends BaseRepository
     /**
      * Prepares a value to be persisted in the database.
      *
-     * @param  mixed  $value
+     * @param mixed $value
+     *
      * @return mixed
      */
     protected function prepareValue($value)
@@ -256,7 +270,7 @@ class Repository extends BaseRepository
      *
      * @return void
      */
-    protected function removeCache()
+    protected function removeCache(): void
     {
         $this->cache->forget('cartalyst.config');
     }

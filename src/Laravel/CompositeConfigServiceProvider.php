@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * Part of the Composite Config package.
  *
  * NOTICE OF LICENSE
@@ -21,9 +21,8 @@
 namespace Cartalyst\CompositeConfig\Laravel;
 
 use PDOException;
-use Symfony\Component\Finder\Finder;
 use Illuminate\Support\ServiceProvider;
-use Cartalyst\CompositeConfig\Repository;;
+use Cartalyst\CompositeConfig\Repository;
 
 class CompositeConfigServiceProvider extends ServiceProvider
 {
@@ -68,21 +67,26 @@ class CompositeConfigServiceProvider extends ServiceProvider
      */
     protected function prepareResources()
     {
-        // Publish config
-        $config = realpath(__DIR__.'/../config/config.php');
+        if ($this->app->runningInConsole()) {
+            // Publish config
+            $this->mergeConfigFrom(
+                realpath(__DIR__.'/../config/config.php'), 'cartalyst.composite-config'
+            );
 
-        $this->mergeConfigFrom($config, 'cartalyst.composite-config');
+            $this->publishes([
+                realpath(__DIR__.'/../config/config.php') => config_path('cartalyst.composite-config.php'),
+            ], 'config');
 
-        $this->publishes([
-            $config => config_path('cartalyst.composite-config.php'),
-        ], 'config');
+            // Publish migrations
+            $this->publishes([
+                realpath(__DIR__.'/../migrations') => database_path('migrations'),
+            ], 'migrations');
 
-        // Publish migrations
-        $migrations = realpath(__DIR__.'/../migrations');
-
-        $this->publishes([
-            $migrations => $this->app->databasePath().'/migrations',
-        ], 'migrations');
+            // Load migrations
+            $this->loadMigrationsFrom(
+                realpath(__DIR__.'/../migrations')
+            );
+        }
     }
 
     /**
