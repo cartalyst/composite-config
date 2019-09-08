@@ -1,6 +1,12 @@
 # Changelog
 
-### v3.0.1 - 2019-00-08
+### v3.0.2 - 2019-09-09
+
+`FIXED`
+
+- A config merging bug.
+
+### v3.0.1 - 2019-09-08
 
 `FIXED`
 
