@@ -1,5 +1,11 @@
 # Changelog
 
+### v3.0.1 - 2019-00-08
+
+`FIXED`
+
+- Setting cached configs using dotted notation.
+
 ### v3.0.0 - 2019-08-31
 
 - BC Break: PHP 7.2 is the minimum required PHP version

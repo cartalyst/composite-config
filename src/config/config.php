@@ -11,11 +11,11 @@
  * bundled with this package in the LICENSE file.
  *
  * @package    Composite Config
- * @version    3.0.0
+ * @version    3.0.1
  * @author     Cartalyst LLC
  * @license    Cartalyst PSL
  * @copyright  (c) 2011-2019, Cartalyst LLC
- * @link       http://cartalyst.com
+ * @link       https://cartalyst.com
  */
 
 return [
