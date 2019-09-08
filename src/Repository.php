@@ -96,8 +96,7 @@ class Repository extends BaseRepository
         $keys = is_array($key) ? $key : [$key => $value];
 
         foreach ($keys as $key => $value) {
-            $this->cachedConfigs[$key] = $value;
-
+            Arr::set($this->cachedConfigs, $key, $value);
             Arr::set($this->items, $key, $value);
         }
     }
