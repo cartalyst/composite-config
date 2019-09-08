@@ -27,9 +27,7 @@ use Cartalyst\CompositeConfig\Repository;
 class CompositeConfigServiceProvider extends ServiceProvider
 {
     /**
-     * Register the service provider.
-     *
-     * @return void
+     * {@inheritdoc}
      */
     public function register()
     {
@@ -67,12 +65,12 @@ class CompositeConfigServiceProvider extends ServiceProvider
      */
     protected function prepareResources()
     {
+        $this->mergeConfigFrom(
+            realpath(__DIR__.'/../config/config.php'), 'cartalyst.composite-config'
+        );
+
         if ($this->app->runningInConsole()) {
             // Publish config
-            $this->mergeConfigFrom(
-                realpath(__DIR__.'/../config/config.php'), 'cartalyst.composite-config'
-            );
-
             $this->publishes([
                 realpath(__DIR__.'/../config/config.php') => config_path('cartalyst.composite-config.php'),
             ], 'config');
