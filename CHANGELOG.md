@@ -1,5 +1,11 @@
 # Changelog
 
+### v3.0.3 - 2019-09-23
+
+`FIXED`
+
+- A cached config bug.
+
 ### v3.0.2 - 2019-09-09
 
 `FIXED`
