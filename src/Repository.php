@@ -221,7 +221,7 @@ class Repository extends BaseRepository
         foreach ($configs as $key => $config) {
             $value = $this->parseValue($config->value);
 
-            $cachedConfigs[$config->item] = $value;
+            Arr::set($cachedConfigs, $item, $value);
 
             parent::set($config->item, $value);
         }
