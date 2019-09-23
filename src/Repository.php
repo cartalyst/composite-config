@@ -110,9 +110,7 @@ class Repository extends BaseRepository
      */
     protected function retrieve(string $key)
     {
-        if (isset($this->cachedConfigs[$key])) {
-            return $this->cachedConfigs[$key];
-        }
+        return Arr::get($this->cachedConfigs, $key);
     }
 
     /**
@@ -216,17 +214,13 @@ class Repository extends BaseRepository
             return $this->database->table($this->databaseTable)->get();
         });
 
-        $cachedConfigs = [];
-
         foreach ($configs as $key => $config) {
             $value = $this->parseValue($config->value);
 
-            Arr::set($cachedConfigs, $item, $value);
+            Arr::set($this->cachedConfigs, $config->item, $value);
 
             parent::set($config->item, $value);
         }
-
-        $this->cachedConfigs = $cachedConfigs;
     }
 
     /**
