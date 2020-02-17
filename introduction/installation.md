@@ -4,7 +4,7 @@ The best way to install the Composite Config package is quickly and easily done 
 
 Open your `composer.json` and add the following to the `require` array
 
-	"cartalyst/composite-config": "^3.0"
+	"cartalyst/composite-config": "^4.0"
 
 Add the following lines after the `require` array on your `composer.json` file
 

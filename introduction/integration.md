@@ -2,7 +2,7 @@
 
 ### Laravel
 
-The Composite Config package has optional support for Laravel 6 and it comes bundled with a Service Provider for easier integration.
+The Composite Config package has optional support for Laravel 7 and it comes bundled with a Service Provider for easier integration.
 
 After you have installed the package correctly, just follow the instructions.
 
