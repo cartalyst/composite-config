@@ -12,6 +12,7 @@ Part of the Cartalyst Arsenal & licensed [Cartalyst PSL](LICENSE). Code well, ro
 
 Version | Laravel   | PHP Version
 ------- | --------- | ------------
+7.x     | 10.x      | >= 8.1
 6.x     | 9.x       | >= 8.0
 5.x     | 8.x       | >= 7.3
 4.x     | 7.x       | >= 7.2.5
@@ -43,4 +44,4 @@ This software is released under the [Cartalyst PSL](LICENSE) License.
 [link-docs]:   https://cartalyst.com/manual/composite-config
 [link-travis]: https://travis-ci.com/cartalyst/composite-config
 
-[icon-travis]: https://travis-ci.com/cartalyst/composite-config.svg?token=LAut3LMbmBFi3T9j45FH&branch=5.x
+[icon-travis]: https://travis-ci.com/cartalyst/composite-config.svg?token=LAut3LMbmBFi3T9j45FH&branch=7.x
